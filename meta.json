@@ -1,0 +1,36 @@
+{
+  "inputs": {
+    "src-esbuild/math.ts": {
+      "bytes": 60,
+      "imports": [],
+      "format": "esm"
+    },
+    "src-esbuild/index.ts": {
+      "bytes": 71,
+      "imports": [
+        {
+          "path": "src-esbuild/math.ts",
+          "kind": "import-statement",
+          "original": "./math"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "../../../../../dev/null": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "src-esbuild/index.ts",
+      "inputs": {
+        "src-esbuild/math.ts": {
+          "bytesInOutput": 29
+        },
+        "src-esbuild/index.ts": {
+          "bytesInOutput": 43
+        }
+      },
+      "bytes": 153
+    }
+  }
+}
