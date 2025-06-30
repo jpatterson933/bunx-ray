@@ -1,6 +1,6 @@
 {
   "name": "bunx-ray",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "ASCII heat-map bundle viewer",
   "type": "module",
   "bin": {
