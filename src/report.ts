@@ -1,4 +1,11 @@
-import { Mod, treemap, draw, formatSize, totalSize, topModules } from './bundle.js';
+import {
+  draw,
+  formatSize,
+  Mod,
+  topModules,
+  totalSize,
+  treemap,
+} from "./bundle.js";
 
 export interface ReportOptions {
   cols: number;
@@ -6,10 +13,9 @@ export interface ReportOptions {
   top: number;
   legend: boolean;
   summary: boolean;
-  color: boolean; // reserved – color disabled for now
 }
 
-const SHADES = ['░', '▒', '▓', '█'] as const;
+const SHADES = ["░", "▒", "▓", "█"] as const;
 
 function calcThresholds(max: number): number[] {
   return [0.25, 0.5, 0.75].map((p) => max * p);
@@ -39,13 +45,13 @@ export function renderReport(mods: Mod[], opts: ReportOptions): RenderedReport {
   let legendLine: string | undefined;
   if (legend) {
     legendLine =
-      'Legend  ' +
+      "Legend  " +
       [
         `${SHADES[3]} >${formatSize(thresholds[2])}`,
         `${SHADES[2]} ${formatSize(thresholds[1])}-${formatSize(thresholds[2])}`,
         `${SHADES[1]} ${formatSize(thresholds[0])}-${formatSize(thresholds[1])}`,
         `${SHADES[0]} <${formatSize(thresholds[0])}`,
-      ].join('  ');
+      ].join("  ");
   }
 
   // summary
@@ -60,9 +66,12 @@ export function renderReport(mods: Mod[], opts: ReportOptions): RenderedReport {
   list.forEach((m, idx) => {
     const shade = shadeForSize(m.size, max);
     const pct = ((m.size / totalSize(mods)) * 100).toFixed(1).padStart(4);
-    const name = m.path.length > 28 ? '…' + m.path.slice(-27) : m.path.padEnd(28);
-    tableLines.push(`${(idx + 1).toString().padStart(2)} ${shade} ${name} ${formatSize(m.size).padStart(8)} (${pct}%)`);
+    const name =
+      m.path.length > 28 ? "…" + m.path.slice(-27) : m.path.padEnd(28);
+    tableLines.push(
+      `${(idx + 1).toString().padStart(2)} ${shade} ${name} ${formatSize(m.size).padStart(8)} (${pct}%)`,
+    );
   });
 
   return { legendLine, summaryLine, grid, tableLines };
-} 
+}

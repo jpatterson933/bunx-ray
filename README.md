@@ -17,7 +17,7 @@ npx bunx-ray <stats.json>
 ## CLI
 
 ```
-bunx-ray [stats.json] [flags]
+bunx-ray <stats.json> [flags]
 
 Flags
   --webpack          Treat input as Webpack stats (default auto-detect)
@@ -29,16 +29,9 @@ Flags
   --grid-only        Only print grid (no legend / summary)
   --no-legend        Hide legend line
   --no-summary       Hide bundle summary
+  -v, --version      Show version
   -h, --help         Show help
 ```
-
-### Quick demo (no bundler needed)
-
-```bash
-bunx-ray $(npx bunx-ray demo)             # renders a built-in sample
-```
-
-_(`bunx-ray demo` prints a temp stats file path; handy for first-time tryout.)_
 
 ---
 
@@ -75,7 +68,7 @@ Install as a normal dependency and import what you need:
 import { normalizeWebpack, treemap, draw, Mod } from "bunx-ray";
 
 const mods: Mod[] = normalizeWebpack(
-  JSON.parse(readFileSync("stats.json", "utf8"))
+  JSON.parse(readFileSync("stats.json", "utf8")),
 );
 console.log(draw(treemap(mods, 80, 24)));
 ```
@@ -92,24 +85,10 @@ All `.d.ts` files ship with the package—no extra `@types` install required.
 
 ---
 
-## Contributing / local playground
+## Contributing
 
-Clone the repo and:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
-```bash
-npm install          # install dev deps
-npm run build        # compile TypeScript → dist/
+## License
 
-# sample bundles
-npm run sample:webpack   # outputs dist-webpack/stats.json
-npm run sample:vite      # outputs dist-vite/stats.json
-npm run sample:esbuild   # outputs dist-esbuild/meta.json
-```
-
-Run tests:
-
-```bash
-npm test
-```
-
-Feel free to tweak the `src-*` sample sources to watch the heat-map change.
+[MIT](LICENSE)

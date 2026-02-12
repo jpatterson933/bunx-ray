@@ -1,0 +1,16 @@
+{
+  "output": [
+    {
+      "modules": {
+        "/src-vite/index.ts": {
+          "renderedLength": 30,
+          "originalLength": 52
+        },
+        "/src-vite/math.ts": {
+          "renderedLength": 28,
+          "originalLength": 60
+        }
+      }
+    }
+  ]
+}
