@@ -1,11 +1,11 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 
 export interface Cell {
   x: number;
   y: number;
   w: number;
   h: number;
-  mod: Mod;
+  mod: ModuleType;
 }
 
 export interface Rect {
@@ -16,7 +16,7 @@ export interface Rect {
 }
 
 export interface TreemapItem {
-  mod: Mod;
+  mod: ModuleType;
   area: number;
 }
 

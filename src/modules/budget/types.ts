@@ -1,7 +1,9 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
+import { z } from "zod";
+
 
 export interface BudgetViolation {
-  mod: Mod;
+  mod: ModuleType;
   budget: number;
   over: number;
 }

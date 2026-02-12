@@ -1,4 +1,4 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 
 export function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + " MB";
@@ -6,10 +6,10 @@ export function formatSize(bytes: number): string {
   return bytes + " B";
 }
 
-export function totalSize(mods: Mod[]): number {
+export function totalSize(mods: ModuleType[]): number {
   return mods.reduce((a, m) => a + m.size, 0);
 }
 
-export function topModules(mods: Mod[], n = 10): Mod[] {
+export function topModules(mods: ModuleType[], n = 10): ModuleType[] {
   return [...mods].sort((a, b) => b.size - a.size).slice(0, n);
 }

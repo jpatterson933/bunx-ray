@@ -1,4 +1,8 @@
-export type Mod = {
-  path: string;
-  size: number;
-};
+import { z } from "zod";
+
+export const ModuleSchema = z.object({
+  path: z.string(),
+  size: z.number()
+})
+
+export type ModuleType = z.infer<typeof ModuleSchema>;

@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { readFileSync } from "fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { Cell } from "../src/modules/treemap/types";
-import type { Mod } from "../src/modules/shared/types";
+import type { ModuleType } from "../src/modules/shared/types";
 import { treemap } from "../src/modules/treemap/service";
 import { draw, shadeFor, shadeIndex } from "../src/modules/drawing/service";
 
@@ -90,7 +90,7 @@ describe("treemap", () => {
   });
 
   it("every module gets a visible cell", () => {
-    const mods: Mod[] = Array.from({ length: 20 }, (_, i) => ({
+    const mods: ModuleType[] = Array.from({ length: 20 }, (_, i) => ({
       path: `mod-${i}.js`,
       size: (20 - i) * 1000,
     }));
@@ -255,7 +255,7 @@ describe("formatSize", () => {
 
 describe("totalSize", () => {
   it("sums all module sizes", () => {
-    const mods: Mod[] = [
+    const mods: ModuleType[] = [
       { path: "a", size: 100 },
       { path: "b", size: 200 },
     ];
@@ -265,7 +265,7 @@ describe("totalSize", () => {
 
 describe("topModules", () => {
   it("returns the N largest modules", () => {
-    const mods: Mod[] = [
+    const mods: ModuleType[] = [
       { path: "a", size: 10 },
       { path: "b", size: 50 },
       { path: "c", size: 30 },

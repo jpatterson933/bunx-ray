@@ -3,9 +3,9 @@
 import { describe, expect, it } from "vitest";
 import { renderReport } from "../src/modules/report/service";
 import { SHADES } from "../src/modules/drawing/constants";
-import type { Mod } from "../src/modules/shared/types";
+import type { ModuleType } from "../src/modules/shared/types";
 
-const sampleMods: Mod[] = [
+const sampleMods: ModuleType[] = [
   { path: "node_modules/lodash/index.js", size: 72000 },
   { path: "node_modules/react/index.js", size: 6400 },
   { path: "src/components/App.tsx", size: 2400 },
@@ -83,7 +83,7 @@ describe("renderReport", () => {
   });
 
   it("truncates long module paths with ellipsis", () => {
-    const longPathMods: Mod[] = [
+    const longPathMods: ModuleType[] = [
       { path: "node_modules/some-very-long-package-name/dist/index.js", size: 5000 },
     ];
     const report = renderReport(longPathMods, { ...defaultOpts, top: 1 });
@@ -91,7 +91,7 @@ describe("renderReport", () => {
   });
 
   it("handles single module correctly", () => {
-    const single: Mod[] = [{ path: "app.js", size: 1000 }];
+    const single: ModuleType[] = [{ path: "app.js", size: 1000 }];
     const report = renderReport(single, { ...defaultOpts, top: 1 });
     expect(report.tableLines.length).toBe(2);
     expect(report.tableLines[1]).toMatch(/100\.0%/);

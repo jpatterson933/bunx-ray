@@ -1,7 +1,7 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 
-export function normalizeWebpack(stats: any): Mod[] {
-  const mods: Mod[] = [];
+export function normalizeWebpack(stats: any): ModuleType[] {
+  const mods: ModuleType[] = [];
   if (Array.isArray(stats.modules)) {
     for (const m of stats.modules) {
       const size = m.size ?? m.parsedSize ?? 0;
@@ -15,8 +15,8 @@ export function normalizeWebpack(stats: any): Mod[] {
   return mods;
 }
 
-export function normalizeVite(stats: any): Mod[] {
-  const mods: Mod[] = [];
+export function normalizeVite(stats: any): ModuleType[] {
+  const mods: ModuleType[] = [];
   const outputs = Array.isArray(stats.output)
     ? stats.output
     : stats.output
@@ -45,8 +45,8 @@ export function normalizeVite(stats: any): Mod[] {
   return mods;
 }
 
-export function normalizeEsbuild(meta: any): Mod[] {
-  const mods: Mod[] = [];
+export function normalizeEsbuild(meta: any): ModuleType[] {
+  const mods: ModuleType[] = [];
   if (meta.inputs && typeof meta.inputs === "object") {
     for (const [p, info] of Object.entries<any>(meta.inputs)) {
       const size = info.bytes ?? 0;

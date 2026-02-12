@@ -2,16 +2,16 @@
 
 import { describe, expect, it } from "vitest";
 import { diffMods, renderDiff } from "../src/modules/diff/service";
-import type { Mod } from "../src/modules/shared/types";
+import type { ModuleType } from "../src/modules/shared/types";
 
-const oldMods: Mod[] = [
+const oldMods: ModuleType[] = [
   { path: "lodash.js", size: 65000 },
   { path: "react.js", size: 6400 },
   { path: "old-utils.js", size: 3200 },
   { path: "api.ts", size: 2000 },
 ];
 
-const newMods: Mod[] = [
+const newMods: ModuleType[] = [
   { path: "lodash.js", size: 72000 },
   { path: "react.js", size: 6400 },
   { path: "api.ts", size: 1500 },

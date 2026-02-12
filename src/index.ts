@@ -1,4 +1,4 @@
-export type { Mod } from "./modules/shared/types.js";
+export type { ModuleType } from "./modules/shared/types.js";
 
 export type { Cell, Rect } from "./modules/treemap/types.js";
 export { treemap } from "./modules/treemap/service.js";

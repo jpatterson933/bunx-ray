@@ -1,4 +1,4 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 import { treemap } from "../treemap/service.js";
 import { draw, shadeFor } from "../drawing/service.js";
 import { SHADES } from "../drawing/constants.js";
@@ -6,7 +6,7 @@ import { colorForSize } from "../color/service.js";
 import { formatSize, topModules, totalSize } from "../utils/service.js";
 import type { RenderedReportType, ReportOptionsType } from "./types.js";
 
-export function renderReport(mods: Mod[], opts: ReportOptionsType): RenderedReportType {
+export function renderReport(mods: ModuleType[], opts: ReportOptionsType): RenderedReportType {
   const { cols, rows, top, legend, summary, color, labels, borders } = opts;
   const max = mods.reduce((m, mod) => Math.max(m, mod.size), 0);
   const total = totalSize(mods);

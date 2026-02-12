@@ -4,7 +4,7 @@ import { Command } from "commander";
 import fs from "fs";
 import path from "path";
 
-import type { Mod } from "./modules/shared/types.js";
+import type { ModuleType } from "./modules/shared/types.js";
 import {
   normalizeEsbuild,
   normalizeVite,
@@ -64,7 +64,7 @@ function parseStatsJson(filePath: string): any {
   }
 }
 
-function detectFormat(stats: any, opts: any): Mod[] {
+function detectFormat(stats: any, opts: any): ModuleType[] {
   if (opts.webpack) return normalizeWebpack(stats);
   if (opts.vite) return normalizeVite(stats);
   if (opts.esbuild) return normalizeEsbuild(stats);

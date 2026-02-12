@@ -1,4 +1,4 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
 import { SIZE_MULTIPLIERS } from "./constants.js";
 import type { BudgetViolation, TotalBudgetViolation } from "./types.js";
@@ -15,7 +15,7 @@ export function parseSize(input: string): number {
   return Math.round(value * SIZE_MULTIPLIERS[unit]);
 }
 
-export function checkBudget(mods: Mod[], budget: number): BudgetViolation[] {
+export function checkBudget(mods: ModuleType[], budget: number): BudgetViolation[] {
   return mods
     .filter((m) => m.size > budget)
     .sort((a, b) => b.size - a.size)
@@ -23,7 +23,7 @@ export function checkBudget(mods: Mod[], budget: number): BudgetViolation[] {
 }
 
 export function checkTotalBudget(
-  mods: Mod[],
+  mods: ModuleType[],
   budget: number,
 ): TotalBudgetViolation | null {
   const total = mods.reduce((a, m) => a + m.size, 0);

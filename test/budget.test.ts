@@ -8,7 +8,7 @@ import {
   formatTotalBudgetViolation,
   parseSize,
 } from "../src/modules/budget/service";
-import type { Mod } from "../src/modules/shared/types";
+import type { ModuleType } from "../src/modules/shared/types";
 
 describe("parseSize", () => {
   it("parses bytes", () => {
@@ -45,7 +45,7 @@ describe("parseSize", () => {
   });
 });
 
-const sampleMods: Mod[] = [
+const sampleMods: ModuleType[] = [
   { path: "lodash.js", size: 72000 },
   { path: "moment.js", size: 55000 },
   { path: "react.js", size: 6400 },

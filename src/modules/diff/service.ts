@@ -1,9 +1,9 @@
 import chalk from "chalk";
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
 import type { DiffResult, ModDiff } from "./types.js";
 
-export function diffMods(oldMods: Mod[], newMods: Mod[]): DiffResult {
+export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResult {
   const oldMap = new Map(oldMods.map((m) => [m.path, m.size]));
   const newMap = new Map(newMods.map((m) => [m.path, m.size]));
 

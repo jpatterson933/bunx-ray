@@ -1,4 +1,4 @@
-import type { Mod } from "../shared/types.js";
+import type { ModuleType } from "../shared/types.js";
 import type { Cell, LayoutResult, Rect, TreemapItem } from "./types.js";
 
 function worstAspectRatio(areas: number[], side: number): number {
@@ -69,7 +69,7 @@ function layoutRow(
   }
 }
 
-export function treemap(mods: Mod[], W = 80, H = 24): Cell[] {
+export function treemap(mods: ModuleType[], W = 80, H = 24): Cell[] {
   if (mods.length === 0) return [];
 
   const sorted = [...mods].sort((a, b) => b.size - a.size);
