@@ -34,9 +34,7 @@ function findStatsFile(): string | undefined {
 }
 
 function resolveStatsFile(explicitPath: string | undefined): string {
-  if (explicitPath) {
-    return explicitPath;
-  }
+  if (explicitPath) return explicitPath;
 
   const found = findStatsFile();
   if (found) {
@@ -44,18 +42,16 @@ function resolveStatsFile(explicitPath: string | undefined): string {
     return found;
   }
 
-  console.error(chalk.red("No stats file found."));
-  console.error(chalk.yellow("\nSearched:"));
-  KNOWN_STATS_PATHS.forEach((p) => console.error(chalk.yellow(`  ${p}`)));
-  console.error(chalk.yellow("\nGenerate one with your bundler:"));
-  console.error(chalk.yellow("  webpack:  npx webpack --json > stats.json"));
-  console.error(
+  const lines = [
+    chalk.red("No stats file found."),
+    chalk.yellow("\nSearched:"),
+    ...KNOWN_STATS_PATHS.map((p) => chalk.yellow(`  ${p}`)),
+    chalk.yellow("\nGenerate one with your bundler:"),
+    chalk.yellow("  webpack:  npx webpack --json > stats.json"),
     chalk.yellow("  esbuild:  esbuild --bundle --metafile=meta.json"),
-  );
-  console.error(
     chalk.yellow("  vite:     vite build (with rollup-plugin-analyzer)"),
-  );
-  process.exit(1);
+  ];
+  throw new Error(lines.join("\n"));
 }
 
 function parseStatsJson(filePath: string): any {
@@ -65,8 +61,7 @@ function parseStatsJson(filePath: string): any {
   try {
     return JSON.parse(raw);
   } catch {
-    console.error(chalk.red(`Failed to parse JSON from ${filePath}`));
-    process.exit(1);
+    throw new Error(`Failed to parse JSON from ${filePath}`);
   }
 }
 
@@ -79,12 +74,9 @@ function detectFormat(stats: any, opts: any): Mod[] {
   if (stats.modules || stats.children) return normalizeWebpack(stats);
   if (stats.output) return normalizeVite(stats);
 
-  console.error(
-    chalk.red(
-      "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
-    ),
+  throw new Error(
+    "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
   );
-  process.exit(1);
 }
 
 function main() {
@@ -115,29 +107,32 @@ function main() {
     process.exit(1);
   }
 
-  const file = resolveStatsFile(program.args[0]);
-  const stats = parseStatsJson(file);
-  const mods = detectFormat(stats, opts);
+  try {
+    const file = resolveStatsFile(program.args[0]);
+    const stats = parseStatsJson(file);
+    const mods = detectFormat(stats, opts);
 
-  if (mods.length === 0) {
-    console.error(chalk.yellow("No modules found in stats file."));
+    if (mods.length === 0) {
+      console.error(chalk.yellow("No modules found in stats file."));
+      process.exit(1);
+    }
+
+    const report = renderReport(mods, {
+      cols,
+      rows,
+      top: Number(opts.top ?? 10),
+      legend: opts.legend !== false && !opts.gridOnly,
+      summary: opts.summary !== false && !opts.gridOnly,
+    });
+
+    if (report.legendLine) console.log(report.legendLine);
+    if (report.summaryLine) console.log(report.summaryLine);
+    console.log("\n" + report.grid + "\n");
+    report.tableLines.forEach((l) => console.log(l));
+  } catch (err: any) {
+    console.error(err.message);
     process.exit(1);
   }
-
-  const report = renderReport(mods, {
-    cols,
-    rows,
-    top: Number(opts.top ?? 10),
-    legend: opts.legend !== false && !opts.gridOnly,
-    summary: opts.summary !== false && !opts.gridOnly,
-  });
-
-  if (report.legendLine) console.log(report.legendLine);
-  if (report.summaryLine) console.log(report.summaryLine);
-
-  console.log("\n" + report.grid + "\n");
-
-  report.tableLines.forEach((l) => console.log(l));
 }
 
 main();
