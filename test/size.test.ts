@@ -2,12 +2,12 @@
 
 import { describe, expect, it } from "vitest";
 import {
-  checkBudget,
-  checkTotalBudget,
-  formatBudgetViolations,
-  formatTotalBudgetViolation,
+  checkModuleSize,
+  checkTotalModuleSize,
+  formatModuleSizeViolations,
+  formatTotalModuleSizeViolation,
   parseSize,
-} from "../src/modules/budget/service";
+} from "../src/modules/size/service";
 import type { ModuleType } from "../src/modules/shared/types";
 
 describe("parseSize", () => {
@@ -52,21 +52,21 @@ const sampleMods: ModuleType[] = [
   { path: "app.js", size: 1000 },
 ];
 
-describe("checkBudget", () => {
-  it("returns violations for modules exceeding budget", () => {
-    const violations = checkBudget(sampleMods, 60000);
+describe("checkModuleSize", () => {
+  it("returns violations for modules exceeding size", () => {
+    const violations = checkModuleSize(sampleMods, 60000);
     expect(violations.length).toBe(1);
     expect(violations[0].module.path).toBe("lodash.js");
     expect(violations[0].overBy).toBe(12000);
   });
 
-  it("returns empty array when all modules under budget", () => {
-    const violations = checkBudget(sampleMods, 100000);
+  it("returns empty array when all modules under size", () => {
+    const violations = checkModuleSize(sampleMods, 100000);
     expect(violations.length).toBe(0);
   });
 
   it("returns multiple violations sorted by size", () => {
-    const violations = checkBudget(sampleMods, 5000);
+    const violations = checkModuleSize(sampleMods, 5000);
     expect(violations.length).toBe(3);
     expect(violations[0].module.size).toBeGreaterThanOrEqual(
       violations[1].module.size,
@@ -74,35 +74,35 @@ describe("checkBudget", () => {
   });
 });
 
-describe("checkTotalBudget", () => {
-  it("returns violation when total exceeds budget", () => {
+describe("checkTotalModuleSize", () => {
+  it("returns violation when total exceeds size", () => {
     const total = sampleMods.reduce((a, m) => a + m.size, 0);
-    const violation = checkTotalBudget(sampleMods, 100000);
+    const violation = checkTotalModuleSize(sampleMods, 100000);
     expect(violation).not.toBeNull();
     expect(violation!.totalModuleSize).toBe(total);
     expect(violation!.overBy).toBe(total - 100000);
   });
 
-  it("returns null when total is under budget", () => {
-    const violation = checkTotalBudget(sampleMods, 200000);
+  it("returns null when total is under size", () => {
+    const violation = checkTotalModuleSize(sampleMods, 200000);
     expect(violation).toBeNull();
   });
 });
 
-describe("formatBudgetViolations", () => {
+describe("formatModuleSizeViolations", () => {
   it("produces formatted output lines", () => {
-    const violations = checkBudget(sampleMods, 60000);
-    const lines = formatBudgetViolations(violations, 60000);
+    const violations = checkModuleSize(sampleMods, 60000);
+    const lines = formatModuleSizeViolations(violations, 60000);
     expect(lines.length).toBeGreaterThan(0);
     expect(lines[0]).toMatch(/Size violations/);
     expect(lines.some((l) => l.includes("FAIL"))).toBe(true);
   });
 });
 
-describe("formatTotalBudgetViolation", () => {
+describe("formatTotalModuleSizeViolation", () => {
   it("produces formatted output lines", () => {
-    const violation = checkTotalBudget(sampleMods, 100000)!;
-    const lines = formatTotalBudgetViolation(violation);
+    const violation = checkTotalModuleSize(sampleMods, 100000)!;
+    const lines = formatTotalModuleSizeViolation(violation);
     expect(lines.length).toBeGreaterThan(0);
     expect(lines[0]).toMatch(/Total size violation/);
   });

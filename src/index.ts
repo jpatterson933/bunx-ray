@@ -26,12 +26,12 @@ export { renderReport } from "./modules/report/service.js";
 export type {
   ModuleSizeViolationType,
   TotalModuleSizeViolationType,
-} from "./modules/budget/types.js";
+} from "./modules/size/types.js";
 export {
   parseSize,
-  checkBudget,
-  checkTotalBudget,
-} from "./modules/budget/service.js";
+  checkModuleSize,
+  checkTotalModuleSize,
+} from "./modules/size/service.js";
 
 export type { ModuleDiffType, DiffResultType } from "./modules/diff/types.js";
 export { diffMods, renderDiff } from "./modules/diff/service.js";

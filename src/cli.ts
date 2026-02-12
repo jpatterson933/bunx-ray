@@ -13,12 +13,12 @@ import {
 import { KNOWN_STATS_PATHS } from "./modules/normalizers/constants.js";
 import { renderReport } from "./modules/report/service.js";
 import {
-  checkBudget,
-  checkTotalBudget,
-  formatBudgetViolations,
-  formatTotalBudgetViolation,
+  checkModuleSize,
+  checkTotalModuleSize,
+  formatModuleSizeViolations,
+  formatTotalModuleSizeViolation,
   parseSize,
-} from "./modules/budget/service.js";
+} from "./modules/size/service.js";
 import { diffMods, renderDiff } from "./modules/diff/service.js";
 
 const { version: VERSION } = JSON.parse(
@@ -167,20 +167,20 @@ function main() {
 
         if (opts.size) {
           const sizeBytes = parseSize(opts.size);
-          const violations = checkBudget(modules, sizeBytes);
+          const violations = checkModuleSize(modules, sizeBytes);
           if (violations.length > 0) {
             sizeValidationFailed = true;
-            const lines = formatBudgetViolations(violations, sizeBytes);
+            const lines = formatModuleSizeViolations(violations, sizeBytes);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }
 
         if (opts.totalSize) {
           const totalSizeBytes = parseSize(opts.totalSize);
-          const violation = checkTotalBudget(modules, totalSizeBytes);
+          const violation = checkTotalModuleSize(modules, totalSizeBytes);
           if (violation) {
             sizeValidationFailed = true;
-            const lines = formatTotalBudgetViolation(violation);
+            const lines = formatTotalModuleSizeViolation(violation);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }

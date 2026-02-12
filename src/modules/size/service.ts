@@ -18,7 +18,7 @@ export function parseSize(input: string): number {
   return Math.round(value * SIZE_MULTIPLIERS[unit]);
 }
 
-export function checkBudget(
+export function checkModuleSize(
   mods: ModuleType[],
   size: number,
 ): ModuleSizeViolationType[] {
@@ -28,7 +28,7 @@ export function checkBudget(
     .map((m) => ({ module: m, moduleSize: size, overBy: m.size - size }));
 }
 
-export function checkTotalBudget(
+export function checkTotalModuleSize(
   modules: ModuleType[],
   moduleSize: number,
 ): TotalModuleSizeViolationType | null {
@@ -37,7 +37,7 @@ export function checkTotalBudget(
   return { totalModuleSize, moduleSize, overBy: totalModuleSize - moduleSize };
 }
 
-export function formatBudgetViolations(
+export function formatModuleSizeViolations(
   violations: ModuleSizeViolationType[],
   size: number,
 ): string[] {
@@ -57,7 +57,7 @@ export function formatBudgetViolations(
   return lines;
 }
 
-export function formatTotalBudgetViolation(
+export function formatTotalModuleSizeViolation(
   violation: TotalModuleSizeViolationType,
 ): string[] {
   return [
