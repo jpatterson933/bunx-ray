@@ -11,13 +11,27 @@
 npm install -g bunx-ray
 
 # or one-off
-npx bunx-ray <stats.json>
+npx bunx-ray
 ```
+
+Run `bunx-ray` in your project directory and it will automatically find your stats file. You can also pass a path explicitly:
+
+```bash
+bunx-ray path/to/stats.json
+```
+
+### Auto-detection
+
+When no file is provided, bunx-ray searches for stats files in common locations:
+
+`stats.json` · `dist/stats.json` · `build/bundle-stats.json` · `dist/bundle-stats.json` · `meta.json` · `dist/meta.json` · `build/meta.json`
+
+The stats format (webpack, vite, esbuild) is detected automatically from the file contents.
 
 ## CLI
 
 ```
-bunx-ray <stats.json> [flags]
+bunx-ray [stats] [flags]
 
 Flags
   --webpack          Treat input as Webpack stats (default auto-detect)
@@ -35,27 +49,29 @@ Flags
 
 ---
 
-## Real-world recipes
+## Generating stats files
+
+Each bundler has its own way of producing a stats file. Generate one, then run `bunx-ray`.
 
 ### Webpack ≥ 4
 
 ```bash
-npx webpack --stats-json            # writes stats.json
-bunx-ray stats.json                 # view heat-map
+npx webpack --json > stats.json
+bunx-ray
 ```
 
 ### Vite v5 / Rollup
 
 ```bash
 vite build --stats.writeTo stats.json
-bunx-ray --vite stats.json
+bunx-ray
 ```
 
 ### esbuild
 
 ```bash
 esbuild src/index.ts --bundle --metafile=meta.json --outfile=/dev/null
-bunx-ray --esbuild meta.json
+bunx-ray
 ```
 
 ---
