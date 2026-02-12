@@ -140,3 +140,8 @@ vite.config.ts.timestamp-*
 
 .specstory
 vite-dist
+
+# Sample build outputs
+dist-webpack/
+dist-vite/
+dist-esbuild/
