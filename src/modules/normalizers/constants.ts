@@ -6,4 +6,8 @@ export const KNOWN_STATS_PATHS = [
   "meta.json",
   "dist/meta.json",
   "build/meta.json",
+  "metafile-cjs.json",
+  "metafile-esm.json",
+  "dist/metafile-cjs.json",
+  "dist/metafile-esm.json",
 ];

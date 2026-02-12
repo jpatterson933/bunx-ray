@@ -31,8 +31,12 @@ When no file is provided, bunx-ray searches for stats files in common locations:
 - `meta.json`
 - `dist/meta.json`
 - `build/meta.json`
+- `metafile-cjs.json`
+- `metafile-esm.json`
+- `dist/metafile-cjs.json`
+- `dist/metafile-esm.json`
 
-The stats format (webpack, vite, esbuild) is detected automatically from the file contents.
+The stats format (webpack, vite, esbuild, tsup) is detected automatically from the file contents.
 
 ---
 
@@ -49,6 +53,7 @@ bunx-ray [stats] [flags]
 | `--webpack`           | Treat input as Webpack stats (default auto-detect) |
 | `--vite`              | Treat input as Vite / Rollup stats                 |
 | `--esbuild`           | Treat input as esbuild metafile                    |
+| `--tsup`              | Treat input as tsup metafile                       |
 | `--cols <n>`          | Terminal columns (default: terminal width)         |
 | `--rows <n>`          | Terminal rows (default: terminal height, max 40)   |
 | `--top <n>`           | Show N largest modules (default 10)                |
@@ -138,6 +143,19 @@ bunx-ray
 
 **Reference**: [esbuild Metafile Documentation](https://esbuild.github.io/api/#metafile)
 
+### tsup
+
+Use the built-in `--metafile` flag:
+
+```bash
+tsup src/index.ts --metafile
+bunx-ray
+```
+
+Outputs `metafile-{format}.json` (e.g. `metafile-cjs.json`, `metafile-esm.json`) in the project root.
+
+**Reference**: [tsup Metafile Documentation](https://tsup.egoist.dev/#metafile)
+
 ---
 
 ## 🔧 TypeScript API
@@ -183,10 +201,10 @@ All `.d.ts` files ship with the package - no extra `@types` install required.
 
 ## ✨ Why text over HTML?
 
-- **Works everywhere** — CI logs, SSH sessions, Codespaces, headless Docker containers
-- **Size enforcement** — Fail a PR when a module grows past your size with `--size`
-- **Build comparison** — Compare builds with `bunx-ray diff` to catch regressions
-- **Instant feedback** — Zero browser animations means real-time results
+- **Works everywhere** - CI logs, SSH sessions, Codespaces, headless Docker containers
+- **Size enforcement** - Fail a PR when a module grows past your size with `--size`
+- **Build comparison** - Compare builds with `bunx-ray diff` to catch regressions
+- **Instant feedback** - Zero browser animations means real-time results
 
 ---
 

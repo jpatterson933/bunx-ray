@@ -48,7 +48,8 @@ function resolveStatsFile(explicitPath: string | undefined): string {
     chalk.yellow("\nGenerate one with your bundler:"),
     chalk.yellow("  webpack:  npx webpack --json > stats.json"),
     chalk.yellow("  esbuild:  esbuild --bundle --metafile=meta.json"),
-    chalk.yellow("  vite:     vite build (with rollup-plugin-analyzer)"),
+    chalk.yellow("  vite:     vite build (with vite-bundle-analyzer)"),
+    chalk.yellow("  tsup:     tsup --metafile"),
   ];
   throw new Error(lines.join("\n"));
 }
@@ -67,14 +68,14 @@ function parseStatsJson(filePath: string): any {
 function detectFormat(stats: any, opts: any): ModuleType[] {
   if (opts.webpack) return normalizeWebpack(stats);
   if (opts.vite) return normalizeVite(stats);
-  if (opts.esbuild) return normalizeEsbuild(stats);
+  if (opts.esbuild || opts.tsup) return normalizeEsbuild(stats);
 
   if (stats.inputs && stats.outputs) return normalizeEsbuild(stats);
   if (stats.modules || stats.children) return normalizeWebpack(stats);
   if (stats.output) return normalizeVite(stats);
 
   throw new Error(
-    "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
+    "Unable to detect stats format; please pass --webpack | --vite | --esbuild | --tsup",
   );
 }
 
@@ -92,6 +93,7 @@ function main() {
     .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
+    .option("--tsup", "Input is tsup metafile")
     .action((oldFile: string, newFile: string, opts: any) => {
       try {
         const oldStats = parseStatsJson(oldFile);
@@ -112,6 +114,7 @@ function main() {
     .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
+    .option("--tsup", "Input is tsup metafile")
     .option("--cols <number>", "Terminal columns (default: terminal width)")
     .option("--rows <number>", "Terminal rows (default: terminal height)")
     .option("--top <number>", "Show N largest modules (default 10)", "10")
