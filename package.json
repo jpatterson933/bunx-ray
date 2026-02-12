@@ -1,6 +1,6 @@
 {
   "name": "bunx-ray",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "ASCII heat-map bundle viewer",
   "type": "module",
   "main": "dist/index.js",
