@@ -1,0 +1,73 @@
+{
+  "inputs": {
+    "node_modules/react/index.js": {
+      "bytes": 6400,
+      "imports": []
+    },
+    "node_modules/react-dom/index.js": {
+      "bytes": 42000,
+      "imports": []
+    },
+    "node_modules/lodash/lodash.js": {
+      "bytes": 72000,
+      "imports": []
+    },
+    "node_modules/axios/index.js": {
+      "bytes": 14200,
+      "imports": []
+    },
+    "node_modules/moment/moment.js": {
+      "bytes": 55300,
+      "imports": []
+    },
+    "src/index.ts": {
+      "bytes": 820,
+      "imports": []
+    },
+    "src/components/App.tsx": {
+      "bytes": 2400,
+      "imports": []
+    },
+    "src/components/Header.tsx": {
+      "bytes": 1100,
+      "imports": []
+    },
+    "src/components/Footer.tsx": {
+      "bytes": 650,
+      "imports": []
+    },
+    "src/utils/format.ts": {
+      "bytes": 340,
+      "imports": []
+    },
+    "src/utils/api.ts": {
+      "bytes": 1500,
+      "imports": []
+    },
+    "src/hooks/useAuth.ts": {
+      "bytes": 780,
+      "imports": []
+    },
+    "src/hooks/useTheme.ts": {
+      "bytes": 420,
+      "imports": []
+    },
+    "src/styles/global.css": {
+      "bytes": 2200,
+      "imports": []
+    },
+    "src/config.ts": {
+      "bytes": 180,
+      "imports": []
+    }
+  },
+  "outputs": {
+    "dist/bundle.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "src/index.ts",
+      "inputs": {},
+      "bytes": 185000
+    }
+  }
+}

@@ -3,7 +3,7 @@
 ## Development Setup
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/bunx-ray.git
+git clone https://github.com/jpatterson933/bunx-ray.git
 cd bunx-ray
 npm install
 npm run build
@@ -28,20 +28,7 @@ bunx-ray/
 │   └── report.ts         # Report rendering
 ├── dist/                 # Compiled output (gitignored)
 ├── test/                 # Test suite
-├── fixtures/             # Test fixtures (JSON stats files)
-├── src-webpack/          # Sample Webpack source
-├── src-vite/             # Sample Vite source
-└── src-esbuild/          # Sample esbuild source
-```
-
-## Generating Sample Stats
-
-These commands regenerate sample build outputs for local testing:
-
-```bash
-npm run sample:webpack   # → dist-webpack/stats.json
-npm run sample:vite      # → dist-vite/
-npm run sample:esbuild   # → dist-esbuild/meta.json
+└── fixtures/             # Test fixtures (JSON stats files)
 ```
 
 ## Code Style

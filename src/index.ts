@@ -1,5 +1,8 @@
-export type { Mod, Cell } from './bundle.js';
+export type { Mod, Cell } from "./bundle.js";
 export {
+  SHADES,
+  shadeFor,
+  shadeIndex,
   normalizeWebpack,
   normalizeVite,
   normalizeEsbuild,
@@ -8,4 +11,7 @@ export {
   formatSize,
   totalSize,
   topModules,
-} from './bundle.js'; 
+} from "./bundle.js";
+
+export type { ReportOptions, RenderedReport } from "./report.js";
+export { renderReport } from "./report.js";

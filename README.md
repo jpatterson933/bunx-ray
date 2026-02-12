@@ -1,6 +1,6 @@
 # bunx-ray
 
-**ASCII heat-map bundle viewer** – inspect JavaScript bundle composition right in your terminal (CI-friendly, SSH-friendly, browser-free).
+**ASCII heat-map bundle viewer** -- inspect JavaScript bundle composition right in your terminal (CI-friendly, SSH-friendly, browser-free).
 
 ---
 
@@ -53,24 +53,26 @@ Flags
 
 Each bundler has its own way of producing a stats file. Generate one, then run `bunx-ray`.
 
-### Webpack ≥ 4
+### Webpack
 
 ```bash
 npx webpack --json > stats.json
 bunx-ray
 ```
 
-### Vite v5 / Rollup
+### Vite / Rollup
+
+Use a plugin like `rollup-plugin-visualizer` with `json` output, or generate stats manually:
 
 ```bash
-vite build --stats.writeTo stats.json
-bunx-ray
+vite build
+bunx-ray dist/stats.json
 ```
 
 ### esbuild
 
 ```bash
-esbuild src/index.ts --bundle --metafile=meta.json --outfile=/dev/null
+esbuild src/index.ts --bundle --metafile=meta.json --outfile=dist/bundle.js
 bunx-ray
 ```
 
@@ -81,22 +83,33 @@ bunx-ray
 Install as a normal dependency and import what you need:
 
 ```ts
-import { normalizeWebpack, treemap, draw, Mod } from "bunx-ray";
+import { normalizeWebpack, treemap, draw, renderReport } from "bunx-ray";
+import { readFileSync } from "fs";
 
-const mods: Mod[] = normalizeWebpack(
-  JSON.parse(readFileSync("stats.json", "utf8")),
-);
+const stats = JSON.parse(readFileSync("stats.json", "utf8"));
+const mods = normalizeWebpack(stats);
+
+// Low-level: generate grid string directly
 console.log(draw(treemap(mods, 80, 24)));
+
+// High-level: get a full report with legend, summary, and table
+const report = renderReport(mods, {
+  cols: 80,
+  rows: 24,
+  top: 10,
+  legend: true,
+  summary: true,
+});
 ```
 
-All `.d.ts` files ship with the package—no extra `@types` install required.
+All `.d.ts` files ship with the package -- no extra `@types` install required.
 
 ---
 
 ## Why text over HTML?
 
 - Works in CI logs, SSH sessions, Codespaces, headless Docker containers.
-- Diff-friendly → fail PR when a module grows past your budget.
+- Diff-friendly -- fail a PR when a module grows past your budget.
 - Zero browser animations = instant feedback.
 
 ---

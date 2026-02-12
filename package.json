@@ -1,7 +1,24 @@
 {
   "name": "bunx-ray",
   "version": "1.0.0",
-  "description": "ASCII heat-map bundle viewer",
+  "description": "ASCII heat-map bundle viewer for webpack, vite, and esbuild",
+  "license": "MIT",
+  "author": "jpatterson933",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpatterson933/bunx-ray.git"
+  },
+  "keywords": [
+    "bundle",
+    "treemap",
+    "webpack",
+    "vite",
+    "esbuild",
+    "bundle-analyzer",
+    "ascii",
+    "cli",
+    "bundle-size"
+  ],
   "type": "module",
   "main": "dist/index.js",
   "exports": {
@@ -14,14 +31,14 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli.js",
     "test": "npm run build && vitest run",
-    "prepublishOnly": "npm run build",
-    "sample:webpack": "mkdir -p dist-webpack && webpack --config webpack.sample.js --mode production --json > dist-webpack/stats.json",
-    "sample:vite": "vite build --config vite.sample.js",
-    "sample:esbuild": "mkdir -p dist-esbuild && esbuild src-esbuild/index.ts --bundle --outfile=dist-esbuild/bundle.js --metafile=dist-esbuild/meta.json"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "chalk": "^5.6.2",
@@ -29,13 +46,8 @@
   },
   "devDependencies": {
     "@types/node": "^25.2.3",
-    "esbuild": "^0.27.3",
     "execa": "^9.6.1",
-    "rollup-plugin-analyzer": "^4.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.1",
-    "vitest": "^4.0.18",
-    "webpack": "^5.105.1",
-    "webpack-cli": "^6.0.1"
+    "vitest": "^4.0.18"
   }
 }
