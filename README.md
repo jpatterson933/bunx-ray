@@ -1,10 +1,10 @@
-# bunx-ray
+# 🎨 bunx-ray
 
-**Color heat-map bundle viewer** -- inspect JavaScript bundle composition right in your terminal. Green means small, red means large. CI-friendly, SSH-friendly, browser-free.
+**Color heat-map bundle viewer** - inspect JavaScript bundle composition right in your terminal. Green means small, red means large. CI-friendly, SSH-friendly, browser-free.
 
 ---
 
-## Install & run
+## 📦 Install & run
 
 ```bash
 # global (recommended)
@@ -24,33 +24,44 @@ bunx-ray path/to/stats.json
 
 When no file is provided, bunx-ray searches for stats files in common locations:
 
-`stats.json` · `dist/stats.json` · `build/bundle-stats.json` · `dist/bundle-stats.json` · `meta.json` · `dist/meta.json` · `build/meta.json`
+- `stats.json`
+- `build/bundle-stats.json`
+- `dist/stats.json`
+- `dist/bundle-stats.json`
+- `meta.json`
+- `dist/meta.json`
+- `build/meta.json`
 
 The stats format (webpack, vite, esbuild) is detected automatically from the file contents.
 
-## CLI
+---
+
+## 💻 CLI
 
 ```
 bunx-ray [stats] [flags]
-
-Flags
-  --webpack              Treat input as Webpack stats (default auto-detect)
-  --vite                 Treat input as Vite / Rollup stats
-  --esbuild              Treat input as esbuild metafile
-  --cols <n>             Terminal columns  (default: terminal width)
-  --rows <n>             Terminal rows     (default: terminal height, max 40)
-  --top  <n>             Show N largest modules (default 10)
-  --labels               Show module names on large treemap cells
-  --no-borders           Hide cell borders
-  --no-color             Disable colors
-  --no-legend            Hide legend line
-  --no-summary           Hide bundle summary
-  --grid-only            Only print grid (no legend / summary)
-  --size <size>          Fail if any module exceeds size (e.g. 50KB, 1MB)
-  --total-size <size>    Fail if total bundle exceeds size
-  -v, --version          Show version
-  -h, --help             Show help
 ```
+
+### Flags
+
+| Flag                  | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| `--webpack`           | Treat input as Webpack stats (default auto-detect) |
+| `--vite`              | Treat input as Vite / Rollup stats                 |
+| `--esbuild`           | Treat input as esbuild metafile                    |
+| `--cols <n>`          | Terminal columns (default: terminal width)         |
+| `--rows <n>`          | Terminal rows (default: terminal height, max 40)   |
+| `--top <n>`           | Show N largest modules (default 10)                |
+| `--labels`            | Show module names on large treemap cells           |
+| `--no-borders`        | Hide cell borders                                  |
+| `--no-color`          | Disable colors                                     |
+| `--no-legend`         | Hide legend line                                   |
+| `--no-summary`        | Hide bundle summary                                |
+| `--grid-only`         | Only print grid (no legend / summary)              |
+| `--size <size>`       | Fail if any module exceeds size (e.g. 50KB, 1MB)   |
+| `--total-size <size>` | Fail if total bundle exceeds size                  |
+| `-v, --version`       | Show version                                       |
+| `-h, --help`          | Show help                                          |
 
 ### Diff mode
 
@@ -81,36 +92,55 @@ Exits with code 1 when a size is exceeded. Size format: a number plus optional u
 
 ---
 
-## Generating stats files
+## 🛠 Generating stats files
 
 Each bundler has its own way of producing a stats file. Generate one, then run `bunx-ray`.
 
 ### Webpack
 
+Use the built-in `--json` flag with optional `--profile` for timing data:
+
 ```bash
-npx webpack --json > stats.json
+npx webpack --profile --json > stats.json
 bunx-ray
 ```
 
-### Vite / Rollup
+**Reference**: [Webpack Stats Documentation](https://webpack.js.org/api/stats/)
 
-Use a plugin like `rollup-plugin-visualizer` with `json` output, or generate stats manually:
+### Vite
+
+Vite does not have built-in stats output. Install a plugin:
 
 ```bash
-vite build
-bunx-ray dist/stats.json
+npm install -D vite-bundle-analyzer
 ```
 
+Add to `vite.config.js`:
+
+```javascript
+import { visualizer } from "vite-bundle-analyzer";
+
+export default {
+  plugins: [visualizer({ analyzerMode: "json" })],
+};
+```
+
+**Reference**: [vite-bundle-analyzer](https://www.npmjs.com/package/vite-bundle-analyzer)
+
 ### esbuild
+
+Use the built-in `--metafile` flag:
 
 ```bash
 esbuild src/index.ts --bundle --metafile=meta.json --outfile=dist/bundle.js
 bunx-ray
 ```
 
+**Reference**: [esbuild Metafile Documentation](https://esbuild.github.io/api/#metafile)
+
 ---
 
-## TypeScript API
+## 🔧 TypeScript API
 
 Install as a normal dependency and import what you need:
 
@@ -147,23 +177,23 @@ const result = diffMods(oldMods, newMods);
 const lines = renderDiff(result);
 ```
 
-All `.d.ts` files ship with the package -- no extra `@types` install required.
+All `.d.ts` files ship with the package - no extra `@types` install required.
 
 ---
 
-## Why text over HTML?
+## ✨ Why text over HTML?
 
-- Works in CI logs, SSH sessions, Codespaces, headless Docker containers.
-- Fail a PR when a module grows past your size with `--size`.
-- Compare builds with `bunx-ray diff` to catch regressions.
-- Zero browser animations = instant feedback.
+- **Works everywhere** — CI logs, SSH sessions, Codespaces, headless Docker containers
+- **Size enforcement** — Fail a PR when a module grows past your size with `--size`
+- **Build comparison** — Compare builds with `bunx-ray diff` to catch regressions
+- **Instant feedback** — Zero browser animations means real-time results
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
-## License
+## 📄 License
 
 [MIT](LICENSE)
