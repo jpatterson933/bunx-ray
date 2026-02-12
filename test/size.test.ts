@@ -68,7 +68,9 @@ describe("checkBudget", () => {
   it("returns multiple violations sorted by size", () => {
     const violations = checkBudget(sampleMods, 5000);
     expect(violations.length).toBe(3);
-    expect(violations[0].module.size).toBeGreaterThanOrEqual(violations[1].module.size);
+    expect(violations[0].module.size).toBeGreaterThanOrEqual(
+      violations[1].module.size,
+    );
   });
 });
 

@@ -1,7 +1,10 @@
 import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
 import { SIZE_MULTIPLIERS } from "./constants.js";
-import type { ModuleSizeViolationType, TotalModuleSizeViolationType } from "./types.js";
+import type {
+  ModuleSizeViolationType,
+  TotalModuleSizeViolationType,
+} from "./types.js";
 
 export function parseSize(input: string): number {
   const match = input.match(/^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)?$/i);
@@ -15,7 +18,10 @@ export function parseSize(input: string): number {
   return Math.round(value * SIZE_MULTIPLIERS[unit]);
 }
 
-export function checkBudget(mods: ModuleType[], size: number): ModuleSizeViolationType[] {
+export function checkBudget(
+  mods: ModuleType[],
+  size: number,
+): ModuleSizeViolationType[] {
   return mods
     .filter((m) => m.size > size)
     .sort((a, b) => b.size - a.size)
@@ -35,9 +41,7 @@ export function formatBudgetViolations(
   violations: ModuleSizeViolationType[],
   size: number,
 ): string[] {
-  const lines: string[] = [
-    `\nSize violations (--size ${formatSize(size)}):`,
-  ];
+  const lines: string[] = [`\nSize violations (--size ${formatSize(size)}):`];
   for (const v of violations) {
     const name =
       v.module.path.length > 40

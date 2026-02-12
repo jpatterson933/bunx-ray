@@ -32,7 +32,8 @@ export function normalizeVite(stats: any): ModuleType[] {
     if (!out || !out.modules) continue;
     hasModules = true;
     for (const [p, m] of Object.entries<any>(out.modules)) {
-      const size = m.renderedLength ?? m.renderedSize ?? m.originalLength ?? m.size ?? 0;
+      const size =
+        m.renderedLength ?? m.renderedSize ?? m.originalLength ?? m.size ?? 0;
       mods.push({ path: p, size });
     }
   }

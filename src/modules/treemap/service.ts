@@ -1,5 +1,10 @@
 import type { ModuleType } from "../shared/types.js";
-import type { Cell, LayoutResult, Rect, TreemapItem } from "./types.js";
+import type {
+  CellType,
+  LayoutResultType,
+  RectangleType,
+  TreemapItemType,
+} from "./types.js";
 
 function worstAspectRatio(areas: number[], side: number): number {
   const sum = areas.reduce((a, b) => a + b, 0);
@@ -13,7 +18,14 @@ function worstAspectRatio(areas: number[], side: number): number {
   return worst;
 }
 
-function clampCell(x: number, y: number, w: number, h: number, W: number, H: number) {
+function clampCell(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  W: number,
+  H: number,
+) {
   const cx = Math.min(x, W - 1);
   const cy = Math.min(y, H - 1);
   return {
@@ -25,12 +37,12 @@ function clampCell(x: number, y: number, w: number, h: number, W: number, H: num
 }
 
 function layoutRow(
-  row: TreemapItem[],
-  rect: Rect,
+  row: TreemapItemType[],
+  rect: RectangleType,
   W: number,
   H: number,
-): LayoutResult {
-  const cells: Cell[] = [];
+): LayoutResultType {
+  const cells: CellType[] = [];
   const rowArea = row.reduce((s, r) => s + r.area, 0);
   const vertical = rect.w <= rect.h;
 
@@ -39,9 +51,7 @@ function layoutRow(
     let yOff = rect.y;
     for (let i = 0; i < row.length; i++) {
       const cellH =
-        i === row.length - 1
-          ? rect.y + rect.h - yOff
-          : row[i].area / rowW;
+        i === row.length - 1 ? rect.y + rect.h - yOff : row[i].area / rowW;
       const x = Math.round(rect.x);
       const y = Math.round(yOff);
       const w = Math.max(1, Math.round(rect.x + rowW) - x);
@@ -55,9 +65,7 @@ function layoutRow(
     let xOff = rect.x;
     for (let i = 0; i < row.length; i++) {
       const cellW =
-        i === row.length - 1
-          ? rect.x + rect.w - xOff
-          : row[i].area / rowH;
+        i === row.length - 1 ? rect.x + rect.w - xOff : row[i].area / rowH;
       const x = Math.round(xOff);
       const y = Math.round(rect.y);
       const w = Math.max(1, Math.round(xOff + cellW) - x);
@@ -69,7 +77,7 @@ function layoutRow(
   }
 }
 
-export function treemap(mods: ModuleType[], W = 80, H = 24): Cell[] {
+export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
   if (mods.length === 0) return [];
 
   const sorted = [...mods].sort((a, b) => b.size - a.size);
@@ -77,14 +85,14 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): Cell[] {
   if (total === 0) return [];
 
   const gridArea = W * H;
-  const items: TreemapItem[] = sorted.map((mod) => ({
+  const items: TreemapItemType[] = sorted.map((mod) => ({
     mod,
     area: (mod.size / total) * gridArea,
   }));
 
-  const cells: Cell[] = [];
-  const rect: Rect = { x: 0, y: 0, w: W, h: H };
-  let row: TreemapItem[] = [];
+  const cells: CellType[] = [];
+  const rect: RectangleType = { x: 0, y: 0, w: W, h: H };
+  let row: TreemapItemType[] = [];
   let i = 0;
 
   while (i < items.length) {
@@ -106,10 +114,7 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): Cell[] {
     }
 
     const currentWorst = worstAspectRatio(areas, side);
-    const candidateWorst = worstAspectRatio(
-      [...areas, items[i].area],
-      side,
-    );
+    const candidateWorst = worstAspectRatio([...areas, items[i].area], side);
 
     if (candidateWorst <= currentWorst) {
       row.push(items[i]);

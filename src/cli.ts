@@ -122,11 +122,12 @@ function main() {
     .option("--no-borders", "Hide cell borders")
     .option("--no-color", "Disable colors")
     .option("--size <size>", "Fail if any module exceeds size (e.g. 50KB)")
-    .option("--total-size <size>", "Fail if total bundle exceeds total size (e.g. 500KB)")
+    .option(
+      "--total-size <size>",
+      "Fail if total bundle exceeds total size (e.g. 500KB)",
+    )
     .action((statsArg: string | undefined, opts: any) => {
-      const cols = opts.cols
-        ? Number(opts.cols)
-        : (process.stdout.columns || 80);
+      const cols = opts.cols ? Number(opts.cols) : process.stdout.columns || 80;
       const rows = opts.rows
         ? Number(opts.rows)
         : Math.min(process.stdout.rows || 24, 40);

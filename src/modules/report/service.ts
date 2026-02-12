@@ -6,7 +6,10 @@ import { colorForSize } from "../color/service.js";
 import { formatSize, topModules, totalSize } from "../utils/service.js";
 import type { RenderedReportType, ReportOptionsType } from "./types.js";
 
-export function renderReport(modules: ModuleType[], opts: ReportOptionsType): RenderedReportType {
+export function renderReport(
+  modules: ModuleType[],
+  opts: ReportOptionsType,
+): RenderedReportType {
   const { cols, rows, top, legend, summary, color, labels, borders } = opts;
   const max = modules.reduce((m, mod) => Math.max(m, mod.size), 0);
   const total = totalSize(modules);
@@ -24,8 +27,16 @@ export function renderReport(modules: ModuleType[], opts: ReportOptionsType): Re
     const t3 = max * 0.75;
     const entries = [
       { shade: SHADES[3], label: `>${formatSize(t3)}`, ratio: 1.0 },
-      { shade: SHADES[2], label: `${formatSize(t2)}-${formatSize(t3)}`, ratio: 0.625 },
-      { shade: SHADES[1], label: `${formatSize(t1)}-${formatSize(t2)}`, ratio: 0.375 },
+      {
+        shade: SHADES[2],
+        label: `${formatSize(t2)}-${formatSize(t3)}`,
+        ratio: 0.625,
+      },
+      {
+        shade: SHADES[1],
+        label: `${formatSize(t1)}-${formatSize(t2)}`,
+        ratio: 0.375,
+      },
       { shade: SHADES[0], label: `<${formatSize(t1)}`, ratio: 0.125 },
     ];
     legendLine =

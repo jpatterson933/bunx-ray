@@ -28,7 +28,12 @@ afterEach(() => {
 describe("CLI with explicit stats argument", () => {
   it("prints legend and summary by default", async () => {
     const { stdout } = await execa("node", [
-      cli, webpackFixture, "--cols", "20", "--rows", "6",
+      cli,
+      webpackFixture,
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
     expect(stdout).toMatch(/Legend/);
     expect(stdout).toMatch(/Total bundle/);
@@ -36,7 +41,13 @@ describe("CLI with explicit stats argument", () => {
 
   it("grid-only hides legend and summary", async () => {
     const { stdout } = await execa("node", [
-      cli, webpackFixture, "--grid-only", "--cols", "20", "--rows", "6",
+      cli,
+      webpackFixture,
+      "--grid-only",
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
     expect(stdout).not.toMatch(/Legend/);
     expect(stdout).not.toMatch(/Total bundle/);
@@ -44,9 +55,18 @@ describe("CLI with explicit stats argument", () => {
 
   it("respects --top flag", async () => {
     const { stdout } = await execa("node", [
-      cli, webpackFixture, "--top", "2", "--cols", "20", "--rows", "6",
+      cli,
+      webpackFixture,
+      "--top",
+      "2",
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
-    const tableLines = stdout.split("\n").filter((l) => /^\s*\d+ [░▒▓█]/.test(l));
+    const tableLines = stdout
+      .split("\n")
+      .filter((l) => /^\s*\d+ [░▒▓█]/.test(l));
     expect(tableLines.length).toBe(2);
   });
 
@@ -59,14 +79,24 @@ describe("CLI with explicit stats argument", () => {
 describe("CLI format auto-detection", () => {
   it("auto-detects esbuild metafile", async () => {
     const { stdout } = await execa("node", [
-      cli, esbuildFixture, "--cols", "20", "--rows", "6",
+      cli,
+      esbuildFixture,
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
     expect(stdout).toMatch(/Legend/);
   });
 
   it("auto-detects vite stats", async () => {
     const { stdout } = await execa("node", [
-      cli, viteFixture, "--cols", "20", "--rows", "6",
+      cli,
+      viteFixture,
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
     expect(stdout).toMatch(/Legend/);
   });
@@ -78,7 +108,8 @@ describe("CLI with auto-detected stats file", () => {
     fs.copyFileSync(webpackFixture, path.join(tmpDir, "stats.json"));
 
     const { stdout } = await execa(
-      "node", [cli, "--cols", "20", "--rows", "6"],
+      "node",
+      [cli, "--cols", "20", "--rows", "6"],
       { cwd: tmpDir },
     );
 
@@ -112,24 +143,39 @@ describe("CLI error handling", () => {
 
 describe("CLI size", () => {
   it("exits 0 when under size", async () => {
-    const result = await execa("node", [
-      cli, esbuildFixture, "--size", "1MB", "--cols", "20", "--rows", "6",
-    ], { reject: false });
+    const result = await execa(
+      "node",
+      [cli, esbuildFixture, "--size", "1MB", "--cols", "20", "--rows", "6"],
+      { reject: false },
+    );
     expect(result.exitCode).toBe(0);
   });
 
   it("exits 1 when over size", async () => {
-    const result = await execa("node", [
-      cli, esbuildFixture, "--size", "1B", "--cols", "20", "--rows", "6",
-    ], { reject: false });
+    const result = await execa(
+      "node",
+      [cli, esbuildFixture, "--size", "1B", "--cols", "20", "--rows", "6"],
+      { reject: false },
+    );
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toMatch(/Size violations/);
   });
 
   it("exits 1 when total size exceeded", async () => {
-    const result = await execa("node", [
-      cli, esbuildFixture, "--total-size", "1B", "--cols", "20", "--rows", "6",
-    ], { reject: false });
+    const result = await execa(
+      "node",
+      [
+        cli,
+        esbuildFixture,
+        "--total-size",
+        "1B",
+        "--cols",
+        "20",
+        "--rows",
+        "6",
+      ],
+      { reject: false },
+    );
     expect(result.exitCode).toBe(1);
     expect(result.stdout).toMatch(/Total size violation/);
   });
@@ -138,7 +184,10 @@ describe("CLI size", () => {
 describe("CLI diff", () => {
   it("compares two stats files", async () => {
     const { stdout } = await execa("node", [
-      cli, "diff", esbuildFixture, webpackFixture,
+      cli,
+      "diff",
+      esbuildFixture,
+      webpackFixture,
     ]);
     expect(stdout).toMatch(/bunx-ray diff/);
     expect(stdout).toMatch(/Total:/);
@@ -148,16 +197,28 @@ describe("CLI diff", () => {
 describe("CLI labels and borders", () => {
   it("--labels flag shows module names", async () => {
     const { stdout } = await execa("node", [
-      cli, esbuildRealisticFixture, "--labels", "--no-color",
-      "--cols", "60", "--rows", "16",
+      cli,
+      esbuildRealisticFixture,
+      "--labels",
+      "--no-color",
+      "--cols",
+      "60",
+      "--rows",
+      "16",
     ]);
     expect(stdout).toMatch(/lodash\.js/);
   });
 
   it("--no-borders flag removes border characters", async () => {
     const { stdout } = await execa("node", [
-      cli, esbuildFixture, "--no-borders", "--no-color",
-      "--cols", "20", "--rows", "6",
+      cli,
+      esbuildFixture,
+      "--no-borders",
+      "--no-color",
+      "--cols",
+      "20",
+      "--rows",
+      "6",
     ]);
     expect(stdout).not.toContain("│");
     expect(stdout).not.toContain("─");
