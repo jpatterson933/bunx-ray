@@ -12,7 +12,80 @@ import {
 
 import { renderReport } from "./report.js";
 
-const VERSION = "0.2.0";
+const { version: VERSION } = JSON.parse(
+  fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
+
+const KNOWN_STATS_PATHS = [
+  "stats.json",
+  "build/bundle-stats.json",
+  "dist/stats.json",
+  "dist/bundle-stats.json",
+  "meta.json",
+  "dist/meta.json",
+  "build/meta.json",
+];
+
+function findStatsFile(): string | undefined {
+  const cwd = process.cwd();
+  return KNOWN_STATS_PATHS.find((candidate) =>
+    fs.existsSync(path.resolve(cwd, candidate)),
+  );
+}
+
+function resolveStatsFile(explicitPath: string | undefined): string {
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const found = findStatsFile();
+  if (found) {
+    console.log(chalk.cyan(`Found ${found}`));
+    return found;
+  }
+
+  console.error(chalk.red("No stats file found."));
+  console.error(chalk.yellow("\nSearched:"));
+  KNOWN_STATS_PATHS.forEach((p) => console.error(chalk.yellow(`  ${p}`)));
+  console.error(chalk.yellow("\nGenerate one with your bundler:"));
+  console.error(chalk.yellow("  webpack:  npx webpack --json > stats.json"));
+  console.error(
+    chalk.yellow("  esbuild:  esbuild --bundle --metafile=meta.json"),
+  );
+  console.error(
+    chalk.yellow("  vite:     vite build (with rollup-plugin-analyzer)"),
+  );
+  process.exit(1);
+}
+
+function parseStatsJson(filePath: string): any {
+  const resolved = path.resolve(process.cwd(), filePath);
+  const raw = fs.readFileSync(resolved, "utf8");
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    console.error(chalk.red(`Failed to parse JSON from ${filePath}`));
+    process.exit(1);
+  }
+}
+
+function detectFormat(stats: any, opts: any): Mod[] {
+  if (opts.webpack) return normalizeWebpack(stats);
+  if (opts.vite) return normalizeVite(stats);
+  if (opts.esbuild) return normalizeEsbuild(stats);
+
+  if (stats.inputs && stats.outputs) return normalizeEsbuild(stats);
+  if (stats.modules || stats.children) return normalizeWebpack(stats);
+  if (stats.output) return normalizeVite(stats);
+
+  console.error(
+    chalk.red(
+      "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
+    ),
+  );
+  process.exit(1);
+}
 
 function main() {
   const program = new Command();
@@ -21,8 +94,8 @@ function main() {
     .name("bunx-ray")
     .description("ASCII heat-map bundle viewer")
     .version(VERSION, "-v, --version")
-    .argument("<stats>", "Build stats JSON file")
-    .option("--webpack", "Input is Webpack stats (default)")
+    .argument("[stats]", "Build stats JSON file (auto-detected if omitted)")
+    .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
     .option("--cols <number>", "Terminal columns (default 80)", "80")
@@ -34,7 +107,6 @@ function main() {
     .parse(process.argv);
 
   const opts = program.opts();
-  const file = program.args[0];
 
   const cols = Number(opts.cols);
   const rows = Number(opts.rows);
@@ -43,37 +115,9 @@ function main() {
     process.exit(1);
   }
 
-  const raw = fs.readFileSync(path.resolve(process.cwd(), file), "utf8");
-  let stats: any;
-  try {
-    stats = JSON.parse(raw);
-  } catch (e) {
-    console.error(chalk.red(`Failed to parse JSON from ${file}`));
-    process.exit(1);
-  }
-
-  // Choose adapter based on flags or auto-detect.
-  let mods: Mod[] = [];
-  if (opts.webpack) {
-    mods = normalizeWebpack(stats);
-  } else if (opts.vite) {
-    mods = normalizeVite(stats);
-  } else if (opts.esbuild) {
-    mods = normalizeEsbuild(stats);
-  } else {
-    // auto-detect simple heuristics
-    if (stats.inputs && stats.outputs) mods = normalizeEsbuild(stats);
-    else if (stats.modules || stats.children) mods = normalizeWebpack(stats);
-    else if (stats.output) mods = normalizeVite(stats);
-    else {
-      console.error(
-        chalk.red(
-          "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
-        ),
-      );
-      process.exit(1);
-    }
-  }
+  const file = resolveStatsFile(program.args[0]);
+  const stats = parseStatsJson(file);
+  const mods = detectFormat(stats, opts);
 
   if (mods.length === 0) {
     console.error(chalk.yellow("No modules found in stats file."));
