@@ -26,5 +26,5 @@ export type {
 } from "./modules/budget/types.js";
 export { parseSize, checkBudget, checkTotalBudget } from "./modules/budget/service.js";
 
-export type { ModDiff, DiffResult } from "./modules/diff/types.js";
+export type { ModuleDiffType, DiffResultType } from "./modules/diff/types.js";
 export { diffMods, renderDiff } from "./modules/diff/service.js";

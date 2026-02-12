@@ -1,16 +1,16 @@
 import chalk from "chalk";
 import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
-import type { DiffResult, ModDiff } from "./types.js";
+import type { DiffResultType, ModuleDiffType } from "./types.js";
 
-export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResult {
+export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResultType {
   const oldMap = new Map(oldMods.map((m) => [m.path, m.size]));
   const newMap = new Map(newMods.map((m) => [m.path, m.size]));
 
-  const changed: ModDiff[] = [];
-  const unchanged: ModDiff[] = [];
-  const added: ModDiff[] = [];
-  const removed: ModDiff[] = [];
+  const changed: ModuleDiffType[] = [];
+  const unchanged: ModuleDiffType[] = [];
+  const added: ModuleDiffType[] = [];
+  const removed: ModuleDiffType[] = [];
 
   for (const [path, newSize] of newMap) {
     const oldSize = oldMap.get(path);
@@ -58,7 +58,7 @@ function padName(path: string, width: number): string {
   return path.length > width ? "…" + path.slice(-(width - 1)) : path.padEnd(width);
 }
 
-export function renderDiff(result: DiffResult): string[] {
+export function renderDiff(result: DiffResultType): string[] {
   const lines: string[] = [];
   const nameWidth = 38;
 
