@@ -6,10 +6,10 @@ export function formatSize(bytes: number): string {
   return bytes + " B";
 }
 
-export function totalSize(mods: ModuleType[]): number {
-  return mods.reduce((a, m) => a + m.size, 0);
+export function totalSize(modules: ModuleType[]): number {
+  return modules.reduce((a, m) => a + m.size, 0);
 }
 
-export function topModules(mods: ModuleType[], n = 10): ModuleType[] {
-  return [...mods].sort((a, b) => b.size - a.size).slice(0, n);
+export function topModules(modules: ModuleType[], n = 10): ModuleType[] {
+  return [...modules].sort((a, b) => b.size - a.size).slice(0, n);
 }

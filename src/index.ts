@@ -21,8 +21,8 @@ export type { ReportOptionsType, RenderedReportType } from "./modules/report/typ
 export { renderReport } from "./modules/report/service.js";
 
 export type {
-  BudgetViolation,
-  TotalBudgetViolation,
+  PackageSizeViolationType,
+  TotalPackageSizeViolationType,
 } from "./modules/budget/types.js";
 export { parseSize, checkBudget, checkTotalBudget } from "./modules/budget/service.js";
 

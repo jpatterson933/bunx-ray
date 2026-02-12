@@ -62,9 +62,9 @@ bunx-ray diff old-stats.json new-stats.json
 
 Shows added, removed, and changed modules with size deltas and percentages.
 
-### Budget enforcement
+### Optional budget enforcement
 
-Fail your CI pipeline when modules get too big:
+Budget checks run only when you pass `--budget` or `--total-budget`; there is no default. Fail your CI pipeline when modules get too big:
 
 ```bash
 # Fail if any single module exceeds 50KB
@@ -77,7 +77,7 @@ bunx-ray stats.json --total-budget 500KB
 bunx-ray stats.json --budget 50KB --total-budget 500KB
 ```
 
-Exits with code 1 when budget is exceeded. Sizes can be specified as `B`, `KB`, `MB`, or `GB`.
+Exits with code 1 when a budget is exceeded. Size format: a number plus optional unit. Units are `B`, `KB`, `MB`, or `GB` (case-insensitive). Omit the unit for bytes (e.g. `50` = 50 bytes). Decimals allowed (e.g. `1.5MB`).
 
 ---
 
