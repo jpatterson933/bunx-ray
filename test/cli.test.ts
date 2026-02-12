@@ -110,28 +110,28 @@ describe("CLI error handling", () => {
   });
 });
 
-describe("CLI budget", () => {
-  it("exits 0 when under budget", async () => {
+describe("CLI size", () => {
+  it("exits 0 when under size", async () => {
     const result = await execa("node", [
-      cli, esbuildFixture, "--budget", "1MB", "--cols", "20", "--rows", "6",
+      cli, esbuildFixture, "--size", "1MB", "--cols", "20", "--rows", "6",
     ], { reject: false });
     expect(result.exitCode).toBe(0);
   });
 
-  it("exits 1 when over budget", async () => {
+  it("exits 1 when over size", async () => {
     const result = await execa("node", [
-      cli, esbuildFixture, "--budget", "1B", "--cols", "20", "--rows", "6",
+      cli, esbuildFixture, "--size", "1B", "--cols", "20", "--rows", "6",
     ], { reject: false });
     expect(result.exitCode).toBe(1);
-    expect(result.stdout).toMatch(/Budget violations/);
+    expect(result.stdout).toMatch(/Size violations/);
   });
 
-  it("exits 1 when total budget exceeded", async () => {
+  it("exits 1 when total size exceeded", async () => {
     const result = await execa("node", [
-      cli, esbuildFixture, "--total-budget", "1B", "--cols", "20", "--rows", "6",
+      cli, esbuildFixture, "--total-size", "1B", "--cols", "20", "--rows", "6",
     ], { reject: false });
     expect(result.exitCode).toBe(1);
-    expect(result.stdout).toMatch(/Total budget violation/);
+    expect(result.stdout).toMatch(/Total size violation/);
   });
 });
 

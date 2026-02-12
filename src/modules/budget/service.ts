@@ -1,7 +1,7 @@
 import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
 import { SIZE_MULTIPLIERS } from "./constants.js";
-import type { BudgetViolation, TotalBudgetViolation } from "./types.js";
+import type { ModuleSizeViolationType, TotalModuleSizeViolationType } from "./types.js";
 
 export function parseSize(input: string): number {
   const match = input.match(/^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)?$/i);
@@ -15,49 +15,49 @@ export function parseSize(input: string): number {
   return Math.round(value * SIZE_MULTIPLIERS[unit]);
 }
 
-export function checkBudget(mods: ModuleType[], budget: number): BudgetViolation[] {
+export function checkBudget(mods: ModuleType[], size: number): ModuleSizeViolationType[] {
   return mods
-    .filter((m) => m.size > budget)
+    .filter((m) => m.size > size)
     .sort((a, b) => b.size - a.size)
-    .map((m) => ({ mod: m, budget, over: m.size - budget }));
+    .map((m) => ({ module: m, moduleSize: size, overBy: m.size - size }));
 }
 
 export function checkTotalBudget(
-  mods: ModuleType[],
-  budget: number,
-): TotalBudgetViolation | null {
-  const total = mods.reduce((a, m) => a + m.size, 0);
-  if (total <= budget) return null;
-  return { total, budget, over: total - budget };
+  modules: ModuleType[],
+  moduleSize: number,
+): TotalModuleSizeViolationType | null {
+  const totalModuleSize = modules.reduce((a, m) => a + m.size, 0);
+  if (totalModuleSize <= moduleSize) return null;
+  return { totalModuleSize, moduleSize, overBy: totalModuleSize - moduleSize };
 }
 
 export function formatBudgetViolations(
-  violations: BudgetViolation[],
-  budget: number,
+  violations: ModuleSizeViolationType[],
+  size: number,
 ): string[] {
   const lines: string[] = [
-    `\nBudget violations (--budget ${formatSize(budget)}):`,
+    `\nSize violations (--size ${formatSize(size)}):`,
   ];
   for (const v of violations) {
     const name =
-      v.mod.path.length > 40
-        ? "…" + v.mod.path.slice(-39)
-        : v.mod.path.padEnd(40);
+      v.module.path.length > 40
+        ? "…" + v.module.path.slice(-39)
+        : v.module.path.padEnd(40);
     lines.push(
-      `  FAIL  ${name}  ${formatSize(v.mod.size).padStart(8)}  (+${formatSize(v.over)} over budget)`,
+      `  FAIL  ${name}  ${formatSize(v.module.size).padStart(8)}  (+${formatSize(v.overBy)} over size)`,
     );
   }
   lines.push(
-    `\n${violations.length} module${violations.length === 1 ? "" : "s"} exceed${violations.length === 1 ? "s" : ""} ${formatSize(budget)} budget`,
+    `\n${violations.length} module${violations.length === 1 ? "" : "s"} exceed${violations.length === 1 ? "s" : ""} ${formatSize(size)} size`,
   );
   return lines;
 }
 
 export function formatTotalBudgetViolation(
-  violation: TotalBudgetViolation,
+  violation: TotalModuleSizeViolationType,
 ): string[] {
   return [
-    `\nTotal budget violation (--total-budget ${formatSize(violation.budget)}):`,
-    `  FAIL  Total bundle: ${formatSize(violation.total)}  (+${formatSize(violation.over)} over budget)`,
+    `\nTotal size violation (--total-size ${formatSize(violation.moduleSize)}):`,
+    `  FAIL  Total bundle: ${formatSize(violation.totalModuleSize)}  (+${formatSize(violation.overBy)} over size)`,
   ];
 }

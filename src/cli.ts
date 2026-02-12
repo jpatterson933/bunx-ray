@@ -121,8 +121,8 @@ function main() {
     .option("--labels", "Show module names on large cells")
     .option("--no-borders", "Hide cell borders")
     .option("--no-color", "Disable colors")
-    .option("--budget <size>", "Fail if any module exceeds size (e.g. 50KB)")
-    .option("--total-budget <size>", "Fail if total bundle exceeds size (e.g. 500KB)")
+    .option("--size <size>", "Fail if any module exceeds size (e.g. 50KB)")
+    .option("--total-size <size>", "Fail if total bundle exceeds total size (e.g. 500KB)")
     .action((statsArg: string | undefined, opts: any) => {
       const cols = opts.cols
         ? Number(opts.cols)
@@ -139,14 +139,14 @@ function main() {
       try {
         const file = resolveStatsFile(statsArg);
         const stats = parseStatsJson(file);
-        const mods = detectFormat(stats, opts);
+        const modules = detectFormat(stats, opts);
 
-        if (mods.length === 0) {
+        if (modules.length === 0) {
           console.error(chalk.yellow("No modules found in stats file."));
           process.exit(1);
         }
 
-        const report = renderReport(mods, {
+        const report = renderReport(modules, {
           cols,
           rows,
           top: Number(opts.top ?? 10),
@@ -162,29 +162,29 @@ function main() {
         console.log("\n" + report.grid + "\n");
         report.tableLines.forEach((l) => console.log(l));
 
-        let budgetFailed = false;
+        let sizeValidationFailed = false;
 
-        if (opts.budget) {
-          const budgetBytes = parseSize(opts.budget);
-          const violations = checkBudget(mods, budgetBytes);
+        if (opts.size) {
+          const sizeBytes = parseSize(opts.size);
+          const violations = checkBudget(modules, sizeBytes);
           if (violations.length > 0) {
-            budgetFailed = true;
-            const lines = formatBudgetViolations(violations, budgetBytes);
+            sizeValidationFailed = true;
+            const lines = formatBudgetViolations(violations, sizeBytes);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }
 
-        if (opts.totalBudget) {
-          const totalBudgetBytes = parseSize(opts.totalBudget);
-          const violation = checkTotalBudget(mods, totalBudgetBytes);
+        if (opts.totalSize) {
+          const totalSizeBytes = parseSize(opts.totalSize);
+          const violation = checkTotalBudget(modules, totalSizeBytes);
           if (violation) {
-            budgetFailed = true;
+            sizeValidationFailed = true;
             const lines = formatTotalBudgetViolation(violation);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }
 
-        if (budgetFailed) process.exit(1);
+        if (sizeValidationFailed) process.exit(1);
       } catch (err: any) {
         console.error(err.message);
         process.exit(1);

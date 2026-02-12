@@ -56,8 +56,8 @@ describe("checkBudget", () => {
   it("returns violations for modules exceeding budget", () => {
     const violations = checkBudget(sampleMods, 60000);
     expect(violations.length).toBe(1);
-    expect(violations[0].mod.path).toBe("lodash.js");
-    expect(violations[0].over).toBe(12000);
+    expect(violations[0].module.path).toBe("lodash.js");
+    expect(violations[0].overBy).toBe(12000);
   });
 
   it("returns empty array when all modules under budget", () => {
@@ -68,7 +68,7 @@ describe("checkBudget", () => {
   it("returns multiple violations sorted by size", () => {
     const violations = checkBudget(sampleMods, 5000);
     expect(violations.length).toBe(3);
-    expect(violations[0].mod.size).toBeGreaterThanOrEqual(violations[1].mod.size);
+    expect(violations[0].module.size).toBeGreaterThanOrEqual(violations[1].module.size);
   });
 });
 
@@ -77,8 +77,8 @@ describe("checkTotalBudget", () => {
     const total = sampleMods.reduce((a, m) => a + m.size, 0);
     const violation = checkTotalBudget(sampleMods, 100000);
     expect(violation).not.toBeNull();
-    expect(violation!.total).toBe(total);
-    expect(violation!.over).toBe(total - 100000);
+    expect(violation!.totalModuleSize).toBe(total);
+    expect(violation!.overBy).toBe(total - 100000);
   });
 
   it("returns null when total is under budget", () => {
@@ -92,7 +92,7 @@ describe("formatBudgetViolations", () => {
     const violations = checkBudget(sampleMods, 60000);
     const lines = formatBudgetViolations(violations, 60000);
     expect(lines.length).toBeGreaterThan(0);
-    expect(lines[0]).toMatch(/Budget violations/);
+    expect(lines[0]).toMatch(/Size violations/);
     expect(lines.some((l) => l.includes("FAIL"))).toBe(true);
   });
 });
@@ -102,6 +102,6 @@ describe("formatTotalBudgetViolation", () => {
     const violation = checkTotalBudget(sampleMods, 100000)!;
     const lines = formatTotalBudgetViolation(violation);
     expect(lines.length).toBeGreaterThan(0);
-    expect(lines[0]).toMatch(/Total budget violation/);
+    expect(lines[0]).toMatch(/Total size violation/);
   });
 });

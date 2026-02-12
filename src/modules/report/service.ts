@@ -6,12 +6,12 @@ import { colorForSize } from "../color/service.js";
 import { formatSize, topModules, totalSize } from "../utils/service.js";
 import type { RenderedReportType, ReportOptionsType } from "./types.js";
 
-export function renderReport(mods: ModuleType[], opts: ReportOptionsType): RenderedReportType {
+export function renderReport(modules: ModuleType[], opts: ReportOptionsType): RenderedReportType {
   const { cols, rows, top, legend, summary, color, labels, borders } = opts;
-  const max = mods.reduce((m, mod) => Math.max(m, mod.size), 0);
-  const total = totalSize(mods);
+  const max = modules.reduce((m, mod) => Math.max(m, mod.size), 0);
+  const total = totalSize(modules);
 
-  const grid = draw(treemap(mods, cols, rows), cols, rows, {
+  const grid = draw(treemap(modules, cols, rows), cols, rows, {
     color,
     labels,
     borders,
@@ -42,10 +42,10 @@ export function renderReport(mods: ModuleType[], opts: ReportOptionsType): Rende
 
   let summaryLine: string | undefined;
   if (summary) {
-    summaryLine = `Total bundle: ${formatSize(total)} | modules: ${mods.length}`;
+    summaryLine = `Total bundle: ${formatSize(total)} | modules: ${modules.length}`;
   }
 
-  const list = topModules(mods, top);
+  const list = topModules(modules, top);
   const tableLines: string[] = [`Top ${list.length} modules`];
   for (let idx = 0; idx < list.length; idx++) {
     const m = list[idx];
