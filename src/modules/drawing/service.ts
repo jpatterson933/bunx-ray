@@ -1,4 +1,4 @@
-import type { Cell } from "../treemap/types.js";
+import type { CellType } from "../treemap/types.js";
 import { colorizeGrid } from "../color/service.js";
 import { SHADES } from "./constants.js";
 import type { DrawOptionsType } from "./types.js";
@@ -14,7 +14,7 @@ export function shadeFor(size: number, max: number): string {
 
 function overlayBorders(
   grid: string[][],
-  cellMap: (Cell | null)[][],
+  cellMap: (CellType | null)[][],
   W: number,
   H: number,
 ): void {
@@ -36,7 +36,7 @@ function overlayBorders(
 
 function overlayLabels(
   grid: string[][],
-  cells: Cell[],
+  cells: CellType[],
   W: number,
   H: number,
 ): void {
@@ -63,21 +63,19 @@ function overlayLabels(
 }
 
 export function draw(
-  cells: Cell[],
+  cells: CellType[],
   W = 80,
   H = 24,
   opts: DrawOptionsType = {},
 ): string {
   const { color = false, labels = false, borders = true } = opts;
 
-  const grid: string[][] = Array.from({ length: H }, () =>
-    Array(W).fill(" "),
-  );
+  const grid: string[][] = Array.from({ length: H }, () => Array(W).fill(" "));
   if (cells.length === 0) return grid.map((r) => r.join("")).join("\n");
 
   const max = cells.reduce((m, c) => Math.max(m, c.mod.size), 0);
 
-  const cellMap: (Cell | null)[][] = Array.from({ length: H }, () =>
+  const cellMap: (CellType | null)[][] = Array.from({ length: H }, () =>
     Array(W).fill(null),
   );
   for (const c of cells) {
@@ -98,7 +96,7 @@ export function draw(
 
   if (labels) overlayLabels(grid, cells, W, H);
 
-  if (color) return colorizeGrid(grid, cellMap, max, W, H);
+  if (color) return colorizeGrid(grid, cellMap, max);
 
   return grid.map((r) => r.join("")).join("\n");
 }

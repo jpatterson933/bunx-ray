@@ -14,9 +14,14 @@ const sampleMods: ModuleType[] = [
 ];
 
 const defaultOpts = {
-  cols: 40, rows: 10, top: 10,
-  legend: true, summary: true,
-  color: false, labels: false, borders: false,
+  cols: 40,
+  rows: 10,
+  top: 10,
+  legend: true,
+  summary: true,
+  color: false,
+  labels: false,
+  borders: false,
 };
 
 describe("renderReport", () => {
@@ -29,7 +34,11 @@ describe("renderReport", () => {
   });
 
   it("grid dimensions match cols x rows", () => {
-    const report = renderReport(sampleMods, { ...defaultOpts, cols: 30, rows: 8 });
+    const report = renderReport(sampleMods, {
+      ...defaultOpts,
+      cols: 30,
+      rows: 8,
+    });
     const lines = report.grid.split("\n");
     expect(lines.length).toBe(8);
     for (const line of lines) {
@@ -57,7 +66,9 @@ describe("renderReport", () => {
     const report = renderReport(sampleMods, defaultOpts);
     const shadeChars = SHADES.join("");
     for (let i = 1; i < report.tableLines.length; i++) {
-      const hasShade = [...report.tableLines[i]].some((ch) => shadeChars.includes(ch));
+      const hasShade = [...report.tableLines[i]].some((ch) =>
+        shadeChars.includes(ch),
+      );
       expect(hasShade).toBe(true);
     }
   });
@@ -84,7 +95,10 @@ describe("renderReport", () => {
 
   it("truncates long module paths with ellipsis", () => {
     const longPathMods: ModuleType[] = [
-      { path: "node_modules/some-very-long-package-name/dist/index.js", size: 5000 },
+      {
+        path: "node_modules/some-very-long-package-name/dist/index.js",
+        size: 5000,
+      },
     ];
     const report = renderReport(longPathMods, { ...defaultOpts, top: 1 });
     expect(report.tableLines[1]).toContain("…");

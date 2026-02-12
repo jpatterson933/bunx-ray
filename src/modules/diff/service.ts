@@ -3,7 +3,10 @@ import type { ModuleType } from "../shared/types.js";
 import { formatSize } from "../utils/service.js";
 import type { DiffResultType, ModuleDiffType } from "./types.js";
 
-export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResultType {
+export function diffMods(
+  oldMods: ModuleType[],
+  newMods: ModuleType[],
+): DiffResultType {
   const oldMap = new Map(oldMods.map((m) => [m.path, m.size]));
   const newMap = new Map(newMods.map((m) => [m.path, m.size]));
 
@@ -15,7 +18,13 @@ export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResu
   for (const [path, newSize] of newMap) {
     const oldSize = oldMap.get(path);
     if (oldSize === undefined) {
-      added.push({ path, oldSize: null, newSize, delta: newSize, pctChange: null });
+      added.push({
+        path,
+        oldSize: null,
+        newSize,
+        delta: newSize,
+        pctChange: null,
+      });
     } else if (oldSize === newSize) {
       unchanged.push({ path, oldSize, newSize, delta: 0, pctChange: 0 });
     } else {
@@ -27,7 +36,13 @@ export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResu
 
   for (const [path, oldSize] of oldMap) {
     if (!newMap.has(path)) {
-      removed.push({ path, oldSize, newSize: null, delta: -oldSize, pctChange: null });
+      removed.push({
+        path,
+        oldSize,
+        newSize: null,
+        delta: -oldSize,
+        pctChange: null,
+      });
     }
   }
 
@@ -40,7 +55,16 @@ export function diffMods(oldMods: ModuleType[], newMods: ModuleType[]): DiffResu
   const totalDelta = newTotal - oldTotal;
   const totalPctChange = oldTotal === 0 ? 0 : (totalDelta / oldTotal) * 100;
 
-  return { oldTotal, newTotal, totalDelta, totalPctChange, changed, unchanged, added, removed };
+  return {
+    oldTotal,
+    newTotal,
+    totalDelta,
+    totalPctChange,
+    changed,
+    unchanged,
+    added,
+    removed,
+  };
 }
 
 function formatDelta(delta: number): string {
@@ -55,7 +79,9 @@ function formatPct(pct: number | null): string {
 }
 
 function padName(path: string, width: number): string {
-  return path.length > width ? "…" + path.slice(-(width - 1)) : path.padEnd(width);
+  return path.length > width
+    ? "…" + path.slice(-(width - 1))
+    : path.padEnd(width);
 }
 
 export function renderDiff(result: DiffResultType): string[] {
@@ -77,12 +103,16 @@ export function renderDiff(result: DiffResultType): string[] {
     for (const d of result.changed) {
       const arrow = d.delta > 0 ? chalk.red("▲") : chalk.green("▼");
       const name = padName(d.path, nameWidth);
-      const deltaStr = d.delta > 0
-        ? chalk.red(formatDelta(d.delta).padStart(10))
-        : chalk.green(formatDelta(d.delta).padStart(10));
-      const pctStr = d.pctChange !== null
-        ? (d.delta > 0 ? chalk.red(formatPct(d.pctChange)) : chalk.green(formatPct(d.pctChange)))
-        : "";
+      const deltaStr =
+        d.delta > 0
+          ? chalk.red(formatDelta(d.delta).padStart(10))
+          : chalk.green(formatDelta(d.delta).padStart(10));
+      const pctStr =
+        d.pctChange !== null
+          ? d.delta > 0
+            ? chalk.red(formatPct(d.pctChange))
+            : chalk.green(formatPct(d.pctChange))
+          : "";
       lines.push(
         ` ${arrow}  ${name}  ${formatSize(d.oldSize!).padStart(8)}  ${formatSize(d.newSize!).padStart(8)}  ${deltaStr}  ${pctStr}`,
       );
@@ -94,7 +124,9 @@ export function renderDiff(result: DiffResultType): string[] {
     lines.push(chalk.yellow(" Added"));
     for (const d of result.added) {
       lines.push(
-        chalk.yellow(` +  ${padName(d.path, nameWidth)}  ${"".padStart(8)}  ${formatSize(d.newSize!).padStart(8)}`),
+        chalk.yellow(
+          ` +  ${padName(d.path, nameWidth)}  ${"".padStart(8)}  ${formatSize(d.newSize!).padStart(8)}`,
+        ),
       );
     }
     lines.push("");
@@ -104,14 +136,20 @@ export function renderDiff(result: DiffResultType): string[] {
     lines.push(chalk.dim(" Removed"));
     for (const d of result.removed) {
       lines.push(
-        chalk.dim(` -  ${padName(d.path, nameWidth)}  ${formatSize(d.oldSize!).padStart(8)}`),
+        chalk.dim(
+          ` -  ${padName(d.path, nameWidth)}  ${formatSize(d.oldSize!).padStart(8)}`,
+        ),
       );
     }
     lines.push("");
   }
 
   if (result.unchanged.length > 0) {
-    lines.push(chalk.dim(` ${result.unchanged.length} unchanged module${result.unchanged.length === 1 ? "" : "s"}`));
+    lines.push(
+      chalk.dim(
+        ` ${result.unchanged.length} unchanged module${result.unchanged.length === 1 ? "" : "s"}`,
+      ),
+    );
   }
 
   return lines;

@@ -7,9 +7,3 @@ export const DrawOptionsSchema = z.object({
 });
 
 export type DrawOptionsType = z.infer<typeof DrawOptionsSchema>;
-
-export interface DrawOptions {
-  color?: boolean;
-  labels?: boolean;
-  borders?: boolean;
-}

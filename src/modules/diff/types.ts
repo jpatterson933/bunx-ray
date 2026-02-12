@@ -6,7 +6,7 @@ export const ModuleDiffSchema = z.object({
   newSize: z.number().nullable(),
   delta: z.number(),
   pctChange: z.number().nullable(),
-})
+});
 
 export const DiffResultSchema = z.object({
   oldTotal: z.number(),
@@ -17,7 +17,7 @@ export const DiffResultSchema = z.object({
   unchanged: z.array(ModuleDiffSchema),
   added: z.array(ModuleDiffSchema),
   removed: z.array(ModuleDiffSchema),
-})
+});
 
 export type ModuleDiffType = z.infer<typeof ModuleDiffSchema>;
 export type DiffResultType = z.infer<typeof DiffResultSchema>;

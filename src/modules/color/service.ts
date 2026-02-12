@@ -1,9 +1,12 @@
 import chalk from "chalk";
-import type { Cell } from "../treemap/types.js";
-import type { ColorFn } from "./types.js";
+import type { CellType } from "../treemap/types.js";
+import type { ColorForSizeResponseType } from "./types.js";
 
-export function colorForSize(size: number, max: number): ColorFn {
-  if (max === 0) return (t) => t;
+export function colorForSize(
+  size: number,
+  max: number,
+): ColorForSizeResponseType {
+  if (max === 0) return (text: string) => text;
   const ratio = size / max;
   const r = ratio < 0.5 ? Math.round(ratio * 2 * 255) : 255;
   const g = ratio < 0.5 ? 255 : Math.round((1 - (ratio - 0.5) * 2) * 255);
@@ -12,10 +15,8 @@ export function colorForSize(size: number, max: number): ColorFn {
 
 export function colorizeGrid(
   grid: string[][],
-  cellMap: (Cell | null)[][],
+  cellMap: (CellType | null)[][],
   max: number,
-  W: number,
-  H: number,
 ): string {
   return grid
     .map((row, y) =>

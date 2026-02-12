@@ -3,7 +3,7 @@
 import chalk from "chalk";
 import { readFileSync } from "fs";
 import { beforeAll, describe, expect, it } from "vitest";
-import type { Cell } from "../src/modules/treemap/types";
+import type { CellType } from "../src/modules/treemap/types";
 import type { ModuleType } from "../src/modules/shared/types";
 import { treemap } from "../src/modules/treemap/service";
 import { draw, shadeFor, shadeIndex } from "../src/modules/drawing/service";
@@ -17,7 +17,11 @@ import {
   normalizeVite,
   normalizeWebpack,
 } from "../src/modules/normalizers/service";
-import { formatSize, topModules, totalSize } from "../src/modules/utils/service";
+import {
+  formatSize,
+  topModules,
+  totalSize,
+} from "../src/modules/utils/service";
 
 const fixturesDir = new URL("../fixtures/", import.meta.url).pathname;
 
@@ -108,7 +112,8 @@ describe("treemap", () => {
 
   it("cells do not extend beyond grid bounds", () => {
     const mods = normalizeEsbuild(load("esbuild-realistic.json"));
-    const W = 60, H = 20;
+    const W = 60,
+      H = 20;
     const cells = treemap(mods, W, H);
     for (const c of cells) {
       expect(c.x + c.w).toBeLessThanOrEqual(W);
@@ -136,7 +141,9 @@ describe("treemap", () => {
 
 describe("draw", () => {
   it("fills the entire grid with no empty space for a single module", () => {
-    const cells: Cell[] = [{ x: 0, y: 0, w: 10, h: 5, mod: { path: "a", size: 100 } }];
+    const cells: CellType[] = [
+      { x: 0, y: 0, w: 10, h: 5, mod: { path: "a", size: 100 } },
+    ];
     const grid = draw(cells, 10, 5);
     const lines = grid.split("\n");
     expect(lines.length).toBe(5);
@@ -148,7 +155,8 @@ describe("draw", () => {
 
   it("produces correct grid dimensions", () => {
     const mods = normalizeEsbuild(load("esbuild-sample.json"));
-    const W = 30, H = 8;
+    const W = 30,
+      H = 8;
     const grid = draw(treemap(mods, W, H), W, H);
     const lines = grid.split("\n");
     expect(lines.length).toBe(H);
@@ -168,7 +176,7 @@ describe("draw", () => {
   });
 
   it("draws borders between adjacent cells", () => {
-    const cells: Cell[] = [
+    const cells: CellType[] = [
       { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
       { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
     ];
@@ -180,7 +188,7 @@ describe("draw", () => {
   });
 
   it("no-borders option disables borders", () => {
-    const cells: Cell[] = [
+    const cells: CellType[] = [
       { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
       { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
     ];
@@ -192,15 +200,21 @@ describe("draw", () => {
   });
 
   it("overlays labels on large cells", () => {
-    const cells: Cell[] = [
-      { x: 0, y: 0, w: 20, h: 5, mod: { path: "node_modules/lodash.js", size: 100 } },
+    const cells: CellType[] = [
+      {
+        x: 0,
+        y: 0,
+        w: 20,
+        h: 5,
+        mod: { path: "node_modules/lodash.js", size: 100 },
+      },
     ];
     const grid = draw(cells, 20, 5, { labels: true, borders: false });
     expect(grid).toContain("lodash.js");
   });
 
   it("does not label small cells", () => {
-    const cells: Cell[] = [
+    const cells: CellType[] = [
       { x: 0, y: 0, w: 8, h: 2, mod: { path: "tiny.js", size: 100 } },
     ];
     const grid = draw(cells, 8, 2, { labels: true, borders: false });
@@ -208,7 +222,7 @@ describe("draw", () => {
   });
 
   it("color option produces ANSI escape codes", () => {
-    const cells: Cell[] = [
+    const cells: CellType[] = [
       { x: 0, y: 0, w: 10, h: 3, mod: { path: "a", size: 100 } },
     ];
     const plain = draw(cells, 10, 3, { color: false, borders: false });

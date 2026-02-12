@@ -13,12 +13,12 @@ import {
 import { KNOWN_STATS_PATHS } from "./modules/normalizers/constants.js";
 import { renderReport } from "./modules/report/service.js";
 import {
-  checkBudget,
-  checkTotalBudget,
-  formatBudgetViolations,
-  formatTotalBudgetViolation,
+  checkModuleSize,
+  checkTotalModuleSize,
+  formatModuleSizeViolations,
+  formatTotalModuleSizeViolation,
   parseSize,
-} from "./modules/budget/service.js";
+} from "./modules/size/service.js";
 import { diffMods, renderDiff } from "./modules/diff/service.js";
 
 const { version: VERSION } = JSON.parse(
@@ -48,7 +48,8 @@ function resolveStatsFile(explicitPath: string | undefined): string {
     chalk.yellow("\nGenerate one with your bundler:"),
     chalk.yellow("  webpack:  npx webpack --json > stats.json"),
     chalk.yellow("  esbuild:  esbuild --bundle --metafile=meta.json"),
-    chalk.yellow("  vite:     vite build (with rollup-plugin-analyzer)"),
+    chalk.yellow("  vite:     vite build (with vite-bundle-analyzer)"),
+    chalk.yellow("  tsup:     tsup --metafile"),
   ];
   throw new Error(lines.join("\n"));
 }
@@ -67,14 +68,14 @@ function parseStatsJson(filePath: string): any {
 function detectFormat(stats: any, opts: any): ModuleType[] {
   if (opts.webpack) return normalizeWebpack(stats);
   if (opts.vite) return normalizeVite(stats);
-  if (opts.esbuild) return normalizeEsbuild(stats);
+  if (opts.esbuild || opts.tsup) return normalizeEsbuild(stats);
 
   if (stats.inputs && stats.outputs) return normalizeEsbuild(stats);
   if (stats.modules || stats.children) return normalizeWebpack(stats);
   if (stats.output) return normalizeVite(stats);
 
   throw new Error(
-    "Unable to detect stats format; please pass --webpack | --vite | --esbuild",
+    "Unable to detect stats format; please pass --webpack | --vite | --esbuild | --tsup",
   );
 }
 
@@ -92,6 +93,7 @@ function main() {
     .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
+    .option("--tsup", "Input is tsup metafile")
     .action((oldFile: string, newFile: string, opts: any) => {
       try {
         const oldStats = parseStatsJson(oldFile);
@@ -112,6 +114,7 @@ function main() {
     .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
+    .option("--tsup", "Input is tsup metafile")
     .option("--cols <number>", "Terminal columns (default: terminal width)")
     .option("--rows <number>", "Terminal rows (default: terminal height)")
     .option("--top <number>", "Show N largest modules (default 10)", "10")
@@ -121,12 +124,13 @@ function main() {
     .option("--labels", "Show module names on large cells")
     .option("--no-borders", "Hide cell borders")
     .option("--no-color", "Disable colors")
-    .option("--budget <size>", "Fail if any module exceeds size (e.g. 50KB)")
-    .option("--total-budget <size>", "Fail if total bundle exceeds size (e.g. 500KB)")
+    .option("--size <size>", "Fail if any module exceeds size (e.g. 50KB)")
+    .option(
+      "--total-size <size>",
+      "Fail if total bundle exceeds total size (e.g. 500KB)",
+    )
     .action((statsArg: string | undefined, opts: any) => {
-      const cols = opts.cols
-        ? Number(opts.cols)
-        : (process.stdout.columns || 80);
+      const cols = opts.cols ? Number(opts.cols) : process.stdout.columns || 80;
       const rows = opts.rows
         ? Number(opts.rows)
         : Math.min(process.stdout.rows || 24, 40);
@@ -139,14 +143,14 @@ function main() {
       try {
         const file = resolveStatsFile(statsArg);
         const stats = parseStatsJson(file);
-        const mods = detectFormat(stats, opts);
+        const modules = detectFormat(stats, opts);
 
-        if (mods.length === 0) {
+        if (modules.length === 0) {
           console.error(chalk.yellow("No modules found in stats file."));
           process.exit(1);
         }
 
-        const report = renderReport(mods, {
+        const report = renderReport(modules, {
           cols,
           rows,
           top: Number(opts.top ?? 10),
@@ -162,29 +166,29 @@ function main() {
         console.log("\n" + report.grid + "\n");
         report.tableLines.forEach((l) => console.log(l));
 
-        let budgetFailed = false;
+        let sizeValidationFailed = false;
 
-        if (opts.budget) {
-          const budgetBytes = parseSize(opts.budget);
-          const violations = checkBudget(mods, budgetBytes);
+        if (opts.size) {
+          const sizeBytes = parseSize(opts.size);
+          const violations = checkModuleSize(modules, sizeBytes);
           if (violations.length > 0) {
-            budgetFailed = true;
-            const lines = formatBudgetViolations(violations, budgetBytes);
+            sizeValidationFailed = true;
+            const lines = formatModuleSizeViolations(violations, sizeBytes);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }
 
-        if (opts.totalBudget) {
-          const totalBudgetBytes = parseSize(opts.totalBudget);
-          const violation = checkTotalBudget(mods, totalBudgetBytes);
+        if (opts.totalSize) {
+          const totalSizeBytes = parseSize(opts.totalSize);
+          const violation = checkTotalModuleSize(modules, totalSizeBytes);
           if (violation) {
-            budgetFailed = true;
-            const lines = formatTotalBudgetViolation(violation);
+            sizeValidationFailed = true;
+            const lines = formatTotalModuleSizeViolation(violation);
             lines.forEach((l) => console.log(chalk.red(l)));
           }
         }
 
-        if (budgetFailed) process.exit(1);
+        if (sizeValidationFailed) process.exit(1);
       } catch (err: any) {
         console.error(err.message);
         process.exit(1);

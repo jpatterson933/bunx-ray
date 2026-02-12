@@ -16,7 +16,7 @@ export const RenderedReportSchema = z.object({
   summaryLine: z.string().optional(),
   grid: z.string(),
   tableLines: z.array(z.string()),
-})
+});
 
 export type ReportOptionsType = z.infer<typeof ReportOptionsSchema>;
 export type RenderedReportType = z.infer<typeof RenderedReportSchema>;
