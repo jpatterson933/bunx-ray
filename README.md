@@ -1,6 +1,6 @@
 # bunx-ray
 
-**ASCII heat-map bundle viewer** -- inspect JavaScript bundle composition right in your terminal (CI-friendly, SSH-friendly, browser-free).
+**Color heat-map bundle viewer** -- inspect JavaScript bundle composition right in your terminal. Green means small, red means large. CI-friendly, SSH-friendly, browser-free.
 
 ---
 
@@ -34,18 +34,50 @@ The stats format (webpack, vite, esbuild) is detected automatically from the fil
 bunx-ray [stats] [flags]
 
 Flags
-  --webpack          Treat input as Webpack stats (default auto-detect)
-  --vite             Treat input as Vite / Rollup stats
-  --esbuild          Treat input as esbuild metafile
-  --cols <n>         Terminal columns  (default 80)
-  --rows <n>         Terminal rows     (default 24)
-  --top  <n>         Show N largest modules (default 10)
-  --grid-only        Only print grid (no legend / summary)
-  --no-legend        Hide legend line
-  --no-summary       Hide bundle summary
-  -v, --version      Show version
-  -h, --help         Show help
+  --webpack              Treat input as Webpack stats (default auto-detect)
+  --vite                 Treat input as Vite / Rollup stats
+  --esbuild              Treat input as esbuild metafile
+  --cols <n>             Terminal columns  (default: terminal width)
+  --rows <n>             Terminal rows     (default: terminal height, max 40)
+  --top  <n>             Show N largest modules (default 10)
+  --labels               Show module names on large treemap cells
+  --no-borders           Hide cell borders
+  --no-color             Disable colors
+  --no-legend            Hide legend line
+  --no-summary           Hide bundle summary
+  --grid-only            Only print grid (no legend / summary)
+  --budget <size>        Fail if any module exceeds size (e.g. 50KB, 1MB)
+  --total-budget <size>  Fail if total bundle exceeds size
+  -v, --version          Show version
+  -h, --help             Show help
 ```
+
+### Diff mode
+
+Compare two builds to see what changed:
+
+```bash
+bunx-ray diff old-stats.json new-stats.json
+```
+
+Shows added, removed, and changed modules with size deltas and percentages.
+
+### Budget enforcement
+
+Fail your CI pipeline when modules get too big:
+
+```bash
+# Fail if any single module exceeds 50KB
+bunx-ray stats.json --budget 50KB
+
+# Fail if total bundle exceeds 500KB
+bunx-ray stats.json --total-budget 500KB
+
+# Both
+bunx-ray stats.json --budget 50KB --total-budget 500KB
+```
+
+Exits with code 1 when budget is exceeded. Sizes can be specified as `B`, `KB`, `MB`, or `GB`.
 
 ---
 
@@ -90,7 +122,7 @@ const stats = JSON.parse(readFileSync("stats.json", "utf8"));
 const mods = normalizeWebpack(stats);
 
 // Low-level: generate grid string directly
-console.log(draw(treemap(mods, 80, 24)));
+console.log(draw(treemap(mods, 80, 24), 80, 24, { color: true, labels: true }));
 
 // High-level: get a full report with legend, summary, and table
 const report = renderReport(mods, {
@@ -99,7 +131,20 @@ const report = renderReport(mods, {
   top: 10,
   legend: true,
   summary: true,
+  color: true,
+  labels: false,
+  borders: true,
 });
+
+// Budget checking
+import { parseSize, checkBudget } from "bunx-ray";
+const budget = parseSize("50KB");
+const violations = checkBudget(mods, budget);
+
+// Diff two builds
+import { diffMods, renderDiff } from "bunx-ray";
+const result = diffMods(oldMods, newMods);
+const lines = renderDiff(result);
 ```
 
 All `.d.ts` files ship with the package -- no extra `@types` install required.
@@ -109,7 +154,8 @@ All `.d.ts` files ship with the package -- no extra `@types` install required.
 ## Why text over HTML?
 
 - Works in CI logs, SSH sessions, Codespaces, headless Docker containers.
-- Diff-friendly -- fail a PR when a module grows past your budget.
+- Fail a PR when a module grows past your budget with `--budget`.
+- Compare builds with `bunx-ray diff` to catch regressions.
 - Zero browser animations = instant feedback.
 
 ---

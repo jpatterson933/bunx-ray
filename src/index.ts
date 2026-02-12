@@ -1,17 +1,30 @@
-export type { Mod, Cell } from "./bundle.js";
+export type { Mod } from "./modules/shared/types.js";
+
+export type { Cell, Rect } from "./modules/treemap/types.js";
+export { treemap } from "./modules/treemap/service.js";
+
+export { SHADES } from "./modules/drawing/constants.js";
+export type { DrawOptions } from "./modules/drawing/types.js";
+export { shadeFor, shadeIndex, draw } from "./modules/drawing/service.js";
+
+export { colorForSize } from "./modules/color/service.js";
+
 export {
-  SHADES,
-  shadeFor,
-  shadeIndex,
   normalizeWebpack,
   normalizeVite,
   normalizeEsbuild,
-  treemap,
-  draw,
-  formatSize,
-  totalSize,
-  topModules,
-} from "./bundle.js";
+} from "./modules/normalizers/service.js";
 
-export type { ReportOptions, RenderedReport } from "./report.js";
-export { renderReport } from "./report.js";
+export { formatSize, totalSize, topModules } from "./modules/utils/service.js";
+
+export type { ReportOptionsType, RenderedReportType } from "./modules/report/types.js";
+export { renderReport } from "./modules/report/service.js";
+
+export type {
+  BudgetViolation,
+  TotalBudgetViolation,
+} from "./modules/budget/types.js";
+export { parseSize, checkBudget, checkTotalBudget } from "./modules/budget/service.js";
+
+export type { ModDiff, DiffResult } from "./modules/diff/types.js";
+export { diffMods, renderDiff } from "./modules/diff/service.js";

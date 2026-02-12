@@ -1,22 +1,23 @@
 /// <reference types="vitest" />
 
+import chalk from "chalk";
 import { readFileSync } from "fs";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
+import type { Cell } from "../src/modules/treemap/types";
+import type { Mod } from "../src/modules/shared/types";
+import { treemap } from "../src/modules/treemap/service";
+import { draw, shadeFor, shadeIndex } from "../src/modules/drawing/service";
+
+beforeAll(() => {
+  chalk.level = 3;
+});
+import { SHADES } from "../src/modules/drawing/constants";
 import {
-  Cell,
-  draw,
-  formatSize,
-  Mod,
   normalizeEsbuild,
   normalizeVite,
   normalizeWebpack,
-  SHADES,
-  shadeFor,
-  shadeIndex,
-  topModules,
-  totalSize,
-  treemap,
-} from "../src/bundle";
+} from "../src/modules/normalizers/service";
+import { formatSize, topModules, totalSize } from "../src/modules/utils/service";
 
 const fixturesDir = new URL("../fixtures/", import.meta.url).pathname;
 
@@ -47,6 +48,14 @@ describe("normalizeVite", () => {
     const mods = normalizeVite(load("vite-sample.json"));
     expect(mods.length).toBe(2);
     expect(mods[0].size).toBeGreaterThanOrEqual(mods[1].size);
+  });
+
+  it("throws on missing output field", () => {
+    expect(() => normalizeVite({})).toThrow("missing 'output' field");
+  });
+
+  it("throws when output entries have no modules", () => {
+    expect(() => normalizeVite({ output: [{}] })).toThrow("no modules");
   });
 });
 
@@ -146,6 +155,65 @@ describe("draw", () => {
     for (const line of lines) {
       expect(line.length).toBe(W);
     }
+  });
+
+  it("returns empty grid for empty cells", () => {
+    const grid = draw([], 10, 3);
+    const lines = grid.split("\n");
+    expect(lines.length).toBe(3);
+    for (const line of lines) {
+      expect(line.length).toBe(10);
+      expect(line.trim()).toBe("");
+    }
+  });
+
+  it("draws borders between adjacent cells", () => {
+    const cells: Cell[] = [
+      { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
+      { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
+    ];
+    const grid = draw(cells, 10, 4, { borders: true });
+    const lines = grid.split("\n");
+    for (const line of lines) {
+      expect(line[4]).toBe("│");
+    }
+  });
+
+  it("no-borders option disables borders", () => {
+    const cells: Cell[] = [
+      { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
+      { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
+    ];
+    const grid = draw(cells, 10, 4, { borders: false });
+    const lines = grid.split("\n");
+    for (const line of lines) {
+      expect(line).not.toContain("│");
+    }
+  });
+
+  it("overlays labels on large cells", () => {
+    const cells: Cell[] = [
+      { x: 0, y: 0, w: 20, h: 5, mod: { path: "node_modules/lodash.js", size: 100 } },
+    ];
+    const grid = draw(cells, 20, 5, { labels: true, borders: false });
+    expect(grid).toContain("lodash.js");
+  });
+
+  it("does not label small cells", () => {
+    const cells: Cell[] = [
+      { x: 0, y: 0, w: 8, h: 2, mod: { path: "tiny.js", size: 100 } },
+    ];
+    const grid = draw(cells, 8, 2, { labels: true, borders: false });
+    expect(grid).not.toContain("tiny.js");
+  });
+
+  it("color option produces ANSI escape codes", () => {
+    const cells: Cell[] = [
+      { x: 0, y: 0, w: 10, h: 3, mod: { path: "a", size: 100 } },
+    ];
+    const plain = draw(cells, 10, 3, { color: false, borders: false });
+    const colored = draw(cells, 10, 3, { color: true, borders: false });
+    expect(colored.length).toBeGreaterThan(plain.length);
   });
 });
 
