@@ -1,30 +1,29 @@
+#!/usr/bin/env node
 import chalk from "chalk";
 import { Command } from "commander";
 import fs from "fs";
 import path from "path";
 
+import type { Mod } from "./modules/shared/types.js";
 import {
-  Mod,
   normalizeEsbuild,
   normalizeVite,
   normalizeWebpack,
-} from "./bundle.js";
-
-import { renderReport } from "./report.js";
+} from "./modules/normalizers/service.js";
+import { KNOWN_STATS_PATHS } from "./modules/normalizers/constants.js";
+import { renderReport } from "./modules/report/service.js";
+import {
+  checkBudget,
+  checkTotalBudget,
+  formatBudgetViolations,
+  formatTotalBudgetViolation,
+  parseSize,
+} from "./modules/budget/service.js";
+import { diffMods, renderDiff } from "./modules/diff/service.js";
 
 const { version: VERSION } = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
 );
-
-const KNOWN_STATS_PATHS = [
-  "stats.json",
-  "build/bundle-stats.json",
-  "dist/stats.json",
-  "dist/bundle-stats.json",
-  "meta.json",
-  "dist/meta.json",
-  "build/meta.json",
-];
 
 function findStatsFile(): string | undefined {
   const cwd = process.cwd();
@@ -85,54 +84,114 @@ function main() {
   program
     .name("bunx-ray")
     .description("ASCII heat-map bundle viewer")
-    .version(VERSION, "-v, --version")
+    .version(VERSION, "-v, --version");
+
+  program
+    .command("diff <old> <new>", { isDefault: false })
+    .description("Compare two builds")
+    .option("--webpack", "Input is Webpack stats")
+    .option("--vite", "Input is Vite/Rollup stats")
+    .option("--esbuild", "Input is esbuild metafile")
+    .action((oldFile: string, newFile: string, opts: any) => {
+      try {
+        const oldStats = parseStatsJson(oldFile);
+        const newStats = parseStatsJson(newFile);
+        const oldMods = detectFormat(oldStats, opts);
+        const newMods = detectFormat(newStats, opts);
+        const result = diffMods(oldMods, newMods);
+        const lines = renderDiff(result);
+        lines.forEach((l) => console.log(l));
+      } catch (err: any) {
+        console.error(err.message);
+        process.exit(1);
+      }
+    });
+
+  program
     .argument("[stats]", "Build stats JSON file (auto-detected if omitted)")
     .option("--webpack", "Input is Webpack stats")
     .option("--vite", "Input is Vite/Rollup stats")
     .option("--esbuild", "Input is esbuild metafile")
-    .option("--cols <number>", "Terminal columns (default 80)", "80")
-    .option("--rows <number>", "Terminal rows (default 24)", "24")
+    .option("--cols <number>", "Terminal columns (default: terminal width)")
+    .option("--rows <number>", "Terminal rows (default: terminal height)")
     .option("--top <number>", "Show N largest modules (default 10)", "10")
     .option("--no-legend", "Hide legend line")
     .option("--no-summary", "Hide summary line")
     .option("--grid-only", "Only print grid (implies --no-legend --no-summary)")
-    .parse(process.argv);
+    .option("--labels", "Show module names on large cells")
+    .option("--no-borders", "Hide cell borders")
+    .option("--no-color", "Disable colors")
+    .option("--budget <size>", "Fail if any module exceeds size (e.g. 50KB)")
+    .option("--total-budget <size>", "Fail if total bundle exceeds size (e.g. 500KB)")
+    .action((statsArg: string | undefined, opts: any) => {
+      const cols = opts.cols
+        ? Number(opts.cols)
+        : (process.stdout.columns || 80);
+      const rows = opts.rows
+        ? Number(opts.rows)
+        : Math.min(process.stdout.rows || 24, 40);
 
-  const opts = program.opts();
+      if (!Number.isFinite(cols) || !Number.isFinite(rows)) {
+        console.error(chalk.red("Error: --cols and --rows must be numbers"));
+        process.exit(1);
+      }
 
-  const cols = Number(opts.cols);
-  const rows = Number(opts.rows);
-  if (!Number.isFinite(cols) || !Number.isFinite(rows)) {
-    console.error(chalk.red("Error: --cols and --rows must be numbers"));
-    process.exit(1);
-  }
+      try {
+        const file = resolveStatsFile(statsArg);
+        const stats = parseStatsJson(file);
+        const mods = detectFormat(stats, opts);
 
-  try {
-    const file = resolveStatsFile(program.args[0]);
-    const stats = parseStatsJson(file);
-    const mods = detectFormat(stats, opts);
+        if (mods.length === 0) {
+          console.error(chalk.yellow("No modules found in stats file."));
+          process.exit(1);
+        }
 
-    if (mods.length === 0) {
-      console.error(chalk.yellow("No modules found in stats file."));
-      process.exit(1);
-    }
+        const report = renderReport(mods, {
+          cols,
+          rows,
+          top: Number(opts.top ?? 10),
+          legend: opts.legend !== false && !opts.gridOnly,
+          summary: opts.summary !== false && !opts.gridOnly,
+          color: opts.color !== false,
+          labels: opts.labels === true,
+          borders: opts.borders !== false,
+        });
 
-    const report = renderReport(mods, {
-      cols,
-      rows,
-      top: Number(opts.top ?? 10),
-      legend: opts.legend !== false && !opts.gridOnly,
-      summary: opts.summary !== false && !opts.gridOnly,
+        if (report.legendLine) console.log(report.legendLine);
+        if (report.summaryLine) console.log(report.summaryLine);
+        console.log("\n" + report.grid + "\n");
+        report.tableLines.forEach((l) => console.log(l));
+
+        let budgetFailed = false;
+
+        if (opts.budget) {
+          const budgetBytes = parseSize(opts.budget);
+          const violations = checkBudget(mods, budgetBytes);
+          if (violations.length > 0) {
+            budgetFailed = true;
+            const lines = formatBudgetViolations(violations, budgetBytes);
+            lines.forEach((l) => console.log(chalk.red(l)));
+          }
+        }
+
+        if (opts.totalBudget) {
+          const totalBudgetBytes = parseSize(opts.totalBudget);
+          const violation = checkTotalBudget(mods, totalBudgetBytes);
+          if (violation) {
+            budgetFailed = true;
+            const lines = formatTotalBudgetViolation(violation);
+            lines.forEach((l) => console.log(chalk.red(l)));
+          }
+        }
+
+        if (budgetFailed) process.exit(1);
+      } catch (err: any) {
+        console.error(err.message);
+        process.exit(1);
+      }
     });
 
-    if (report.legendLine) console.log(report.legendLine);
-    if (report.summaryLine) console.log(report.summaryLine);
-    console.log("\n" + report.grid + "\n");
-    report.tableLines.forEach((l) => console.log(l));
-  } catch (err: any) {
-    console.error(err.message);
-    process.exit(1);
-  }
+  program.parse(process.argv);
 }
 
 main();
