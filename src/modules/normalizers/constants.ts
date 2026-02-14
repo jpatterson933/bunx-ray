@@ -10,4 +10,6 @@ export const KNOWN_STATS_PATHS = [
   "metafile-esm.json",
   "dist/metafile-cjs.json",
   "dist/metafile-esm.json",
+  "rollup-stats.json",
+  "dist/rollup-stats.json",
 ];

@@ -14,6 +14,7 @@ beforeAll(() => {
 import { SHADES } from "../src/modules/drawing/constants";
 import {
   normalizeEsbuild,
+  normalizeRollup,
   normalizeVite,
   normalizeWebpack,
 } from "../src/modules/normalizers/service";
@@ -76,6 +77,40 @@ describe("normalizeEsbuild", () => {
     expect(mods.length).toBe(15);
     expect(mods[0].path).toContain("lodash");
     expect(mods[0].size).toBe(72000);
+  });
+});
+
+describe("normalizeRollup", () => {
+  it("extracts modules from chunk entries", () => {
+    const mods = normalizeRollup(load("rollup-sample.json"));
+    expect(mods.length).toBe(4);
+    for (const m of mods) {
+      expect(m.path).toBeTruthy();
+      expect(m.size).toBeGreaterThan(0);
+    }
+  });
+
+  it("returns modules sorted by size descending", () => {
+    const mods = normalizeRollup(load("rollup-sample.json"));
+    for (let i = 1; i < mods.length; i++) {
+      expect(mods[i - 1].size).toBeGreaterThanOrEqual(mods[i].size);
+    }
+  });
+
+  it("skips asset entries", () => {
+    const mods = normalizeRollup(load("rollup-sample.json"));
+    const paths = mods.map((m) => m.path);
+    expect(paths).not.toContain("style.css");
+  });
+
+  it("throws on missing output", () => {
+    expect(() => normalizeRollup({})).toThrow("missing 'output' array");
+  });
+
+  it("throws when no chunk entries found", () => {
+    expect(() => normalizeRollup({ output: [{ type: "asset" }] })).toThrow(
+      "no chunk entries",
+    );
   });
 });
 

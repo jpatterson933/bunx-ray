@@ -1,0 +1,37 @@
+{
+  "output": [
+    {
+      "type": "chunk",
+      "fileName": "index.js",
+      "modules": {
+        "src/index.ts": {
+          "renderedLength": 2400,
+          "originalLength": 3200
+        },
+        "src/utils.ts": {
+          "renderedLength": 1800,
+          "originalLength": 2100
+        }
+      }
+    },
+    {
+      "type": "chunk",
+      "fileName": "vendor.js",
+      "modules": {
+        "node_modules/lodash-es/cloneDeep.js": {
+          "renderedLength": 18200,
+          "originalLength": 22400
+        },
+        "node_modules/react/index.js": {
+          "renderedLength": 6400,
+          "originalLength": 8100
+        }
+      }
+    },
+    {
+      "type": "asset",
+      "fileName": "style.css",
+      "source": "body { margin: 0 }"
+    }
+  ]
+}
