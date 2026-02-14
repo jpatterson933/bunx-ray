@@ -95,15 +95,15 @@ bunx-ray stats.json --md
 
 Output:
 
-```
+```markdown
 ### bunx-ray — Bundle Report
 
 **Total:** 350.2 KB | **Modules:** 42
 
-| # | Module | Size | % | |
-|---|--------|------|---|---|
-| 1 | `node_modules/lodash/lodash.js` | 72.0 KB | 20.6% | `████████████████` |
-| 2 | `node_modules/react-dom/index.js` | 42.1 KB | 12.0% | `█████████░░░░░░░` |
+| #   | Module                            | Size    | %     |                    |
+| --- | --------------------------------- | ------- | ----- | ------------------ |
+| 1   | `node_modules/lodash/lodash.js`   | 72.0 KB | 20.6% | `████████████████` |
+| 2   | `node_modules/react-dom/index.js` | 42.1 KB | 12.0% | `█████████░░░░░░░` |
 ```
 
 ### JSON (`--json`)
