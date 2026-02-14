@@ -22,6 +22,7 @@ const defaultOpts = {
   color: false,
   labels: false,
   borders: false,
+  duplicates: false,
 };
 
 describe("renderReport", () => {

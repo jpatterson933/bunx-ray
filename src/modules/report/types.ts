@@ -9,6 +9,7 @@ const ReportOptionsSchema = z.object({
   color: z.boolean(),
   labels: z.boolean(),
   borders: z.boolean(),
+  duplicates: z.boolean(),
 });
 
 export const RenderedReportSchema = z.object({
@@ -16,6 +17,7 @@ export const RenderedReportSchema = z.object({
   summaryLine: z.string().optional(),
   grid: z.string(),
   tableLines: z.array(z.string()),
+  duplicateLines: z.array(z.string()),
 });
 
 export type ReportOptionsType = z.infer<typeof ReportOptionsSchema>;

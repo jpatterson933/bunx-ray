@@ -57,3 +57,30 @@ export function normalizeEsbuild(meta: any): ModuleType[] {
   mods.sort((a, b) => b.size - a.size);
   return mods;
 }
+
+export function normalizeRollup(stats: any): ModuleType[] {
+  const mods: ModuleType[] = [];
+  const outputs = Array.isArray(stats.output) ? stats.output : [];
+
+  if (outputs.length === 0) {
+    throw new Error("Rollup stats missing 'output' array");
+  }
+
+  const chunks = outputs.filter((o: any) => o.type === "chunk" || o.modules);
+
+  if (chunks.length === 0) {
+    throw new Error("Rollup stats contain no chunk entries");
+  }
+
+  for (const chunk of chunks) {
+    if (!chunk.modules) continue;
+    for (const [p, m] of Object.entries<any>(chunk.modules)) {
+      const size =
+        m.renderedLength ?? m.renderedSize ?? m.originalLength ?? m.size ?? 0;
+      mods.push({ path: p, size });
+    }
+  }
+
+  mods.sort((a, b) => b.size - a.size);
+  return mods;
+}

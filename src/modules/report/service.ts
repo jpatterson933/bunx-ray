@@ -4,6 +4,7 @@ import { draw, shadeFor } from "../drawing/service.js";
 import { SHADES } from "../drawing/constants.js";
 import { colorForSize } from "../color/service.js";
 import { formatSize, topModules, totalSize } from "../utils/service.js";
+import { findDuplicates, renderDuplicateLines } from "../duplicates/service.js";
 import type { RenderedReportType, ReportOptionsType } from "./types.js";
 
 export function renderReport(
@@ -70,5 +71,9 @@ export function renderReport(
     );
   }
 
-  return { legendLine, summaryLine, grid, tableLines };
+  const duplicateLines = opts.duplicates
+    ? renderDuplicateLines(findDuplicates(modules))
+    : [];
+
+  return { legendLine, summaryLine, grid, tableLines, duplicateLines };
 }
