@@ -1,6 +1,6 @@
 {
   "name": "bunx-ray",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "ASCII heat-map bundle viewer for webpack, vite, and esbuild",
   "license": "MIT",
   "author": "jpatterson933",
