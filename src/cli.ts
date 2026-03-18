@@ -13,6 +13,7 @@ import {
 } from "./modules/normalizers/service.js";
 import { KNOWN_STATS_PATHS } from "./modules/normalizers/constants.js";
 import { renderReport } from "./modules/report/service.js";
+import { topModules } from "./modules/utils/service.js";
 import {
   checkModuleSize,
   checkTotalModuleSize,
@@ -43,6 +44,12 @@ import {
   groupByPackage,
   renderPackageLines,
 } from "./modules/grouping/service.js";
+import {
+  buildWhyGraph,
+  findWhyChains,
+  renderWhyLines,
+  renderWhyMarkdown,
+} from "./modules/why/service.js";
 
 const { version: VERSION } = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -191,6 +198,7 @@ function main() {
       "--snapshot-file <path>",
       "Snapshot file path (default: .bunxray-history.json)",
     )
+    .option("--why", "Show import chains for top modules")
     .option("--no-legend", "Hide legend line")
     .option("--no-summary", "Hide summary line")
     .option("--grid-only", "Only print grid (implies --no-legend --no-summary)")
@@ -242,12 +250,19 @@ function main() {
 
         const chunks = extractChunks(stats, opts);
         const packages = opts.groupByPackage ? groupByPackage(modules) : [];
+        const wantsWhy = Boolean(opts.why);
 
         if (opts.json) {
           const report = renderJsonReport(modules, { top });
           const duplicates =
             opts.duplicates !== false ? findDuplicates(modules) : [];
           const sizeCheck = runSizeChecks(modules, sizeStr, totalSizeStr);
+          const whyChains = wantsWhy
+            ? findWhyChains(
+                buildWhyGraph(stats, opts),
+                report.top.map((m) => m.path),
+              )
+            : [];
 
           console.log(
             JSON.stringify(
@@ -256,6 +271,7 @@ function main() {
                 chunks,
                 ...(packages.length > 0 ? { packages } : {}),
                 duplicates,
+                ...(wantsWhy ? { why: { chains: whyChains } } : {}),
                 violations: {
                   modules: sizeCheck.moduleViolations.map((v) => ({
                     path: v.module.path,
@@ -284,7 +300,15 @@ function main() {
         }
 
         if (opts.md) {
-          console.log(renderMarkdownReport(modules, { top }));
+          const whyChains = wantsWhy
+            ? findWhyChains(
+                buildWhyGraph(stats, opts),
+                topModules(modules, top).map((m) => m.path),
+              )
+            : [];
+          const report = renderMarkdownReport(modules, { top });
+          const whyBlock = wantsWhy ? renderWhyMarkdown(whyChains) : "";
+          console.log(whyBlock ? `${report}\n\n${whyBlock}` : report);
           const sizeCheck = runSizeChecks(modules, sizeStr, totalSizeStr);
 
           if (process.env.GITHUB_ACTIONS && sizeCheck.failed) {
@@ -299,6 +323,12 @@ function main() {
           return;
         }
 
+        const whyChains = wantsWhy
+          ? findWhyChains(
+              buildWhyGraph(stats, opts),
+              topModules(modules, top).map((m) => m.path),
+            )
+          : [];
         const report = renderReport(modules, {
           cols,
           rows,
@@ -331,6 +361,14 @@ function main() {
         if (report.duplicateLines.length > 0) {
           console.log("");
           report.duplicateLines.forEach((l) => console.log(l));
+        }
+
+        if (wantsWhy) {
+          const whyLines = renderWhyLines(whyChains);
+          if (whyLines.length > 0) {
+            console.log("");
+            whyLines.forEach((l) => console.log(l));
+          }
         }
 
         const snapshot = loadSnapshot(opts.snapshotFile);

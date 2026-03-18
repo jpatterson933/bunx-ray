@@ -79,3 +79,15 @@ export {
   groupByPackage,
   renderPackageLines,
 } from "./modules/grouping/service.js";
+
+export type {
+  WhyGraphType,
+  WhyChainType,
+  WhyBuildOptionsType,
+} from "./modules/why/types.js";
+export {
+  buildWhyGraph,
+  findWhyChains,
+  renderWhyLines,
+  renderWhyMarkdown,
+} from "./modules/why/service.js";

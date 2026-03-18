@@ -194,6 +194,22 @@ describe("CLI diff", () => {
   });
 });
 
+describe("CLI why", () => {
+  it("adds why chains to JSON output when --why is set", async () => {
+    const { stdout } = await execa("node", [
+      cli,
+      esbuildFixture,
+      "--json",
+      "--why",
+    ]);
+    const report = JSON.parse(stdout);
+    expect(report.why).toBeTruthy();
+    expect(Array.isArray(report.why.chains)).toBe(true);
+    expect(report.why.chains.length).toBeGreaterThan(0);
+    expect(report.why.chains[0]).toHaveProperty("chain");
+  });
+});
+
 describe("CLI labels and borders", () => {
   it("--labels flag shows module names", async () => {
     const { stdout } = await execa("node", [
