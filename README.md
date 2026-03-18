@@ -66,6 +66,7 @@ bunx-ray [stats] [flags]
 | `--no-duplicates`        | Hide duplicate module detection                     |
 | `--save-snapshot`        | Save current bundle data to `.bunxray-history.json` |
 | `--snapshot-file <path>` | Override snapshot file path                         |
+| `--why`                  | Show import chains for top modules                  |
 | `--labels`               | Show module names on large treemap cells            |
 | `--no-borders`           | Hide cell borders                                   |
 | `--no-color`             | Disable colors                                      |
@@ -106,6 +107,8 @@ Output:
 | 2   | `node_modules/react-dom/index.js` | 42.1 KB | 12.0% | `█████████░░░░░░░` |
 ```
 
+When `--why` is passed, an additional "Why" table is appended below the main report.
+
 ### JSON (`--json`)
 
 Produces structured JSON with `total`, `totalFormatted`, `moduleCount`, `modules` (all modules with path and size), `top` (top N with percentage), `chunks`, `duplicates`, and `violations`. Suitable for programmatic consumption:
@@ -130,6 +133,8 @@ The JSON output includes:
 ```
 
 When `--group-by-package` is also passed, a `packages` array is included in the JSON.
+
+When `--why` is passed, a `why` object is included with `chains` (import chains for the top modules).
 
 Both `--md` and `--json` work with the `diff` subcommand as well.
 
@@ -197,6 +202,36 @@ Potential duplicates (2 groups, 18.4 KB wasted)
 ```
 
 Duplicates are also included in `--json` output. Disable with `--no-duplicates`.
+
+---
+
+## Write Output to a File
+
+Use shell redirection to save reports:
+
+```bash
+bunx-ray stats.json --md > bunxray-report.md
+bunx-ray stats.json --json > bunxray-report.json
+```
+
+---
+
+## Why (Import Chains)
+
+Use `--why` to show _why_ a module is in your bundle by printing the shortest import chain from an entrypoint to each top module.
+
+```bash
+bunx-ray stats.json --why
+bunx-ray stats.json --why --top 15
+```
+
+Output appears after the duplicates section in ANSI mode, and as a "Why" block in Markdown/JSON output.
+
+**Notes**
+
+- The chains are computed from the same **top N modules** shown in the report (`--top`).
+- Best supported for **esbuild/tsup** and **webpack** (they include import graph metadata).
+- For stats formats without import graph data (e.g. some rollup/vite outputs), bunx-ray will note that no import graph is available.
 
 ---
 
@@ -455,6 +490,18 @@ import { diffMods, renderDiff, renderMarkdownDiff } from "bunx-ray";
 const result = diffMods(oldMods, newMods);
 const ansiLines = renderDiff(result);
 const markdownStr = renderMarkdownDiff(result);
+```
+
+### Why (Import Chains)
+
+```ts
+import { buildWhyGraph, findWhyChains } from "bunx-ray";
+
+const graph = buildWhyGraph(stats, { webpack: true });
+const chains = findWhyChains(graph, [
+  "src/index.ts",
+  "node_modules/react-dom/index.js",
+]);
 ```
 
 ### Size Checking
