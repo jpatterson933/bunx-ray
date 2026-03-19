@@ -62,6 +62,71 @@ describe("normalizeVite", () => {
   it("throws when output entries have no modules", () => {
     expect(() => normalizeVite({ output: [{}] })).toThrow("no modules");
   });
+
+  it("handles vite-bundle-analyzer flat array format", () => {
+    const stats = [
+      {
+        filename: "assets/index-abc123.js",
+        parsedSize: 6000,
+        gzipSize: 1500,
+        isEntry: true,
+        source: [
+          {
+            label: "node_modules",
+            parsedSize: 4000,
+            groups: [
+              {
+                label: "react",
+                parsedSize: 4000,
+                groups: [{ label: "index.js", parsedSize: 4000 }],
+              },
+            ],
+          },
+          {
+            label: "src",
+            parsedSize: 2000,
+            groups: [{ label: "main.tsx", parsedSize: 2000 }],
+          },
+        ],
+      },
+    ];
+    const mods = normalizeVite(stats);
+    expect(mods.length).toBe(2);
+    expect(mods.find((m) => m.path === "node_modules/react/index.js")?.size).toBe(4000);
+    expect(mods.find((m) => m.path === "src/main.tsx")?.size).toBe(2000);
+    expect(mods[0].size).toBeGreaterThanOrEqual(mods[1].size);
+  });
+
+  it("handles vite-bundle-analyzer with multiple chunks", () => {
+    const stats = [
+      {
+        filename: "assets/main.js",
+        parsedSize: 2000,
+        gzipSize: 800,
+        isEntry: true,
+        source: [
+          { label: "src", parsedSize: 2000, groups: [{ label: "main.tsx", parsedSize: 2000 }] },
+        ],
+      },
+      {
+        filename: "assets/vendor.js",
+        parsedSize: 10000,
+        gzipSize: 3000,
+        isEntry: false,
+        source: [
+          {
+            label: "node_modules",
+            parsedSize: 10000,
+            groups: [{ label: "lodash.js", parsedSize: 10000 }],
+          },
+        ],
+      },
+    ];
+    const mods = normalizeVite(stats);
+    expect(mods.length).toBe(2);
+    expect(mods[0].path).toBe("node_modules/lodash.js");
+    expect(mods[0].size).toBe(10000);
+  });
 });
 
 describe("normalizeEsbuild", () => {

@@ -16,6 +16,27 @@ export function normalizeWebpack(stats: any): ModuleType[] {
 }
 
 export function normalizeVite(stats: any): ModuleType[] {
+  // vite-bundle-analyzer format: bare array with parsedSize + source tree
+  if (Array.isArray(stats)) {
+    const mods: ModuleType[] = [];
+    function flatten(nodes: any[], prefix: string): void {
+      for (const node of nodes) {
+        const fullPath = prefix ? `${prefix}/${node.label}` : node.label;
+        if (node.groups?.length > 0) {
+          flatten(node.groups, fullPath);
+        } else {
+          mods.push({ path: fullPath, size: node.parsedSize ?? 0 });
+        }
+      }
+    }
+    for (const chunk of stats) {
+      if (Array.isArray(chunk.source)) flatten(chunk.source, "");
+    }
+    mods.sort((a, b) => b.size - a.size);
+    return mods;
+  }
+
+  // Rollup/rollup-plugin-visualizer format: { output: [...] }
   const mods: ModuleType[] = [];
   const outputs = Array.isArray(stats.output)
     ? stats.output

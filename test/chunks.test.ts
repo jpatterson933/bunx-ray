@@ -125,6 +125,29 @@ describe("extractChunks", () => {
     const chunks = extractChunks({}, {});
     expect(chunks.length).toBe(0);
   });
+
+  it("extracts vite-bundle-analyzer chunks with --vite flag", () => {
+    const stats = [
+      { filename: "assets/main.js", parsedSize: 6000, gzipSize: 1500, isEntry: true, source: [] },
+      { filename: "assets/vendor.js", parsedSize: 20000, gzipSize: 5000, isEntry: false, source: [] },
+    ];
+    const chunks = extractChunks(stats, { vite: true });
+    expect(chunks.length).toBe(2);
+    expect(chunks[0].name).toBe("assets/main.js");
+    expect(chunks[0].size).toBe(6000);
+    expect(chunks[0].isEntry).toBe(true);
+    expect(chunks[1].name).toBe("assets/vendor.js");
+    expect(chunks[1].isEntry).toBe(false);
+  });
+
+  it("auto-detects vite-bundle-analyzer format", () => {
+    const stats = [
+      { filename: "assets/main.js", parsedSize: 6000, gzipSize: 1500, isEntry: true, source: [] },
+    ];
+    const chunks = extractChunks(stats, {});
+    expect(chunks.length).toBe(1);
+    expect(chunks[0].name).toBe("assets/main.js");
+  });
 });
 
 describe("renderChunkLines", () => {
