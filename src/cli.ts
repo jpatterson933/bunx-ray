@@ -110,6 +110,8 @@ function detectFormat(stats: any, opts: any): ModuleType[] {
   )
     return normalizeRollup(stats);
   if (stats.output) return normalizeVite(stats);
+  if (Array.isArray(stats) && stats[0]?.parsedSize != null && Array.isArray(stats[0]?.source))
+    return normalizeVite(stats);
 
   throw new Error(
     "Unable to detect stats format; please pass --webpack | --vite | --rollup | --esbuild | --tsup",

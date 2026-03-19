@@ -45,16 +45,38 @@ function extractRollupChunks(stats: any): ChunkType[] {
     });
 }
 
+function isViteBundleAnalyzer(stats: any): boolean {
+  return (
+    Array.isArray(stats) &&
+    stats.length > 0 &&
+    typeof stats[0]?.parsedSize === "number" &&
+    Array.isArray(stats[0]?.source)
+  );
+}
+
+function extractViteBundleAnalyzerChunks(stats: any[]): ChunkType[] {
+  return stats.map((chunk) => ({
+    name: chunk.filename ?? chunk.label,
+    size: chunk.parsedSize ?? 0,
+    isEntry: chunk.isEntry ?? false,
+    moduleCount: 0,
+  }));
+}
+
 export function extractChunks(stats: any, opts: any): ChunkType[] {
   if (opts.webpack) return extractWebpackChunks(stats);
   if (opts.esbuild || opts.tsup) return extractEsbuildChunks(stats);
   if (opts.rollup) return extractRollupChunks(stats);
-  if (opts.vite) return extractRollupChunks(stats);
+  if (opts.vite) {
+    if (isViteBundleAnalyzer(stats)) return extractViteBundleAnalyzerChunks(stats);
+    return extractRollupChunks(stats);
+  }
 
   if (stats.chunks && Array.isArray(stats.chunks))
     return extractWebpackChunks(stats);
   if (stats.outputs && typeof stats.outputs === "object")
     return extractEsbuildChunks(stats);
+  if (isViteBundleAnalyzer(stats)) return extractViteBundleAnalyzerChunks(stats);
   if (Array.isArray(stats.output)) return extractRollupChunks(stats);
   if (stats.output) return extractRollupChunks(stats);
 
