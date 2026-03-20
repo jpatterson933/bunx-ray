@@ -6,13 +6,22 @@ import type {
   TreemapItemType,
 } from "./types.js";
 
-function worstAspectRatio(areas: number[], side: number): number {
-  const sum = areas.reduce((a, b) => a + b, 0);
+function worstAspectRatio(
+  row: TreemapItemType[],
+  rowSum: number,
+  side: number,
+  extra = 0,
+): number {
+  const sum = rowSum + extra;
   const s2 = side * side;
   const sum2 = sum * sum;
   let worst = 0;
-  for (const a of areas) {
-    const r = Math.max((s2 * a) / sum2, sum2 / (s2 * a));
+  for (const item of row) {
+    const r = Math.max((s2 * item.area) / sum2, sum2 / (s2 * item.area));
+    if (r > worst) worst = r;
+  }
+  if (extra > 0) {
+    const r = Math.max((s2 * extra) / sum2, sum2 / (s2 * extra));
     if (r > worst) worst = r;
   }
   return worst;
@@ -93,6 +102,7 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
   const cells: CellType[] = [];
   const rect: RectangleType = { x: 0, y: 0, w: W, h: H };
   let row: TreemapItemType[] = [];
+  let rowSum = 0;
   let i = 0;
 
   while (i < items.length) {
@@ -105,18 +115,18 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
       break;
     }
 
-    const areas = row.map((r) => r.area);
-
     if (row.length === 0) {
       row.push(items[i]);
+      rowSum = items[i].area;
       i++;
       continue;
     }
 
-    const currentWorst = worstAspectRatio(areas, side);
-    const candidateWorst = worstAspectRatio([...areas, items[i].area], side);
+    const currentWorst = worstAspectRatio(row, rowSum, side);
+    const candidateWorst = worstAspectRatio(row, rowSum, side, items[i].area);
 
     if (candidateWorst <= currentWorst) {
+      rowSum += items[i].area;
       row.push(items[i]);
       i++;
     } else {
@@ -130,6 +140,7 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
         rect.h -= result.consumed.amount;
       }
       row = [];
+      rowSum = 0;
     }
   }
 
