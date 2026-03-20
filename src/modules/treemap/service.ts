@@ -1,10 +1,10 @@
-import type { ModuleType } from "../shared/types.js";
+import type { ModuleType } from "../shared/schema.js";
 import type {
   CellType,
   LayoutResultType,
   RectangleType,
   TreemapItemType,
-} from "./types.js";
+} from "./schema.js";
 
 function worstAspectRatio(
   row: TreemapItemType[],
@@ -86,6 +86,16 @@ function layoutRow(
   }
 }
 
+function applyLayout(result: LayoutResultType, rect: RectangleType): void {
+  if (result.consumed.axis === "x") {
+    rect.x += result.consumed.amount;
+    rect.w -= result.consumed.amount;
+  } else {
+    rect.y += result.consumed.amount;
+    rect.h -= result.consumed.amount;
+  }
+}
+
 export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
   if (mods.length === 0) return [];
 
@@ -132,13 +142,7 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
     } else {
       const result = layoutRow(row, rect, W, H);
       cells.push(...result.cells);
-      if (result.consumed.axis === "x") {
-        rect.x += result.consumed.amount;
-        rect.w -= result.consumed.amount;
-      } else {
-        rect.y += result.consumed.amount;
-        rect.h -= result.consumed.amount;
-      }
+      applyLayout(result, rect);
       row = [];
       rowSum = 0;
     }
@@ -147,13 +151,7 @@ export function treemap(mods: ModuleType[], W = 80, H = 24): CellType[] {
   if (row.length > 0) {
     const result = layoutRow(row, rect, W, H);
     cells.push(...result.cells);
-    if (result.consumed.axis === "x") {
-      rect.x += result.consumed.amount;
-      rect.w -= result.consumed.amount;
-    } else {
-      rect.y += result.consumed.amount;
-      rect.h -= result.consumed.amount;
-    }
+    applyLayout(result, rect);
   }
 
   return cells;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const ReportOptionsSchema = z.object({
+export const ReportOptionsSchema = z.object({
   cols: z.number(),
   rows: z.number(),
   top: z.number(),

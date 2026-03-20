@@ -1,5 +1,5 @@
-import { type ModuleType, ModuleSchema } from "../shared/types.js";
 import { z } from "zod";
+import { ModuleSchema } from "../shared/schema.js";
 
 export const CellSchema = z.object({
   x: z.number(),
@@ -21,14 +21,12 @@ export const TreemapItemSchema = z.object({
   area: z.number(),
 });
 
-const ConsumedSchema = z.object({
-  axis: z.enum(["x", "y"]),
-  amount: z.number(),
-});
-
 export const LayoutResultSchema = z.object({
   cells: z.array(CellSchema),
-  consumed: ConsumedSchema,
+  consumed: z.object({
+    axis: z.enum(["x", "y"]),
+    amount: z.number(),
+  }),
 });
 
 export type CellType = z.infer<typeof CellSchema>;

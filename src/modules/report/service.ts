@@ -1,17 +1,16 @@
-import type { ModuleType } from "../shared/types.js";
+import type { ModuleType } from "../shared/schema.js";
 import { treemap } from "../treemap/service.js";
-import { draw, shadeFor } from "../drawing/service.js";
-import { SHADES } from "../drawing/constants.js";
+import { draw, shadeFor, SHADES } from "../drawing/service.js";
 import { colorForSize } from "../color/service.js";
-import { formatSize, topModules, totalSize } from "../utils/service.js";
-import type { RenderedReportType, ReportOptionsType } from "./types.js";
+import { formatSize, topModules, totalSize, maxSize } from "../utils/service.js";
+import type { RenderedReportType, ReportOptionsType } from "./schema.js";
 
 export function renderReport(
   modules: ModuleType[],
   opts: ReportOptionsType,
 ): RenderedReportType {
   const { cols, rows, top } = opts;
-  const max = modules.reduce((m, mod) => Math.max(m, mod.size), 0);
+  const max = maxSize(modules);
   const total = totalSize(modules);
 
   const grid = draw(treemap(modules, cols, rows), cols, rows, {

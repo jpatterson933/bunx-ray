@@ -1,7 +1,8 @@
-import type { CellType } from "../treemap/types.js";
+import type { CellType } from "../treemap/schema.js";
 import { colorizeGrid } from "../color/service.js";
-import { SHADES } from "./constants.js";
-import type { DrawOptionsType } from "./types.js";
+import type { DrawOptionsType } from "./schema.js";
+
+export const SHADES = ["░", "▒", "▓", "█"] as const;
 
 export function shadeIndex(size: number, max: number): number {
   if (max === 0) return 0;
