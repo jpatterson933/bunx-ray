@@ -5,8 +5,10 @@ import fs from "fs";
 import path from "path";
 
 import { renderReport } from "./modules/report/service.js";
+import { ReportOptionsSchema } from "./modules/report/schema.js";
 import { xray } from "./modules/xray/service.js";
 import { loadConfig } from "./modules/config/service.js";
+import { ConfigSchema } from "./modules/config/schema.js";
 
 const { version: VERSION } = JSON.parse(
   fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -35,10 +37,10 @@ function main() {
   program
     .argument("<dir>", "Bundled output directory")
     .action((dirArg: string) => {
-      const config = loadConfig();
-      const top = Number(config?.top ?? 10);
+      const config = ConfigSchema.parse(loadConfig() ?? {});
       const cols = process.stdout.columns || 80;
       const rows = Math.min(process.stdout.rows || 24, 40);
+      const opts = ReportOptionsSchema.parse({ cols, rows, top: config.top });
 
       try {
         const modules = resolveModules(dirArg);
@@ -48,7 +50,7 @@ function main() {
           process.exit(1);
         }
 
-        const report = renderReport(modules, { cols, rows, top });
+        const report = renderReport(modules, opts);
 
         console.log(report.legendLine);
         console.log(report.summaryLine);

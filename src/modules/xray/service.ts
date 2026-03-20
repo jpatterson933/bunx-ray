@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { ModuleType } from "../shared/schema.js";
+import { ModuleSchema, type ModuleType } from "../shared/schema.js";
 
 export function xray(dirPath: string): ModuleType[] {
   return fs
@@ -8,6 +8,9 @@ export function xray(dirPath: string): ModuleType[] {
     .filter((e) => e.isFile())
     .map((e) => {
       const full = path.join(e.parentPath, e.name);
-      return { path: path.relative(dirPath, full), size: fs.statSync(full).size };
+      return ModuleSchema.parse({
+        path: path.relative(dirPath, full),
+        size: fs.statSync(full).size,
+      });
     });
 }
