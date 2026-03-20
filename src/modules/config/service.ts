@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { z } from "zod";
 import { ConfigSchema, type ConfigType } from "./schema.js";
 
 const CONFIG_FILE_NAMES = [".bunxrayrc.json", "bunxray.config.json"];
@@ -13,7 +14,14 @@ export function loadConfig(cwd?: string): ConfigType | null {
 
     const raw = fs.readFileSync(filePath, "utf8");
     const parsed = JSON.parse(raw);
-    return ConfigSchema.parse(parsed);
+    const result = ConfigSchema.safeParse(parsed);
+    if (!result.success) {
+      const tree = z.treeifyError(result.error);
+      throw new Error(
+        `Invalid config in ${name}:\n${JSON.stringify(tree, null, 2)}`,
+      );
+    }
+    return result.data;
   }
 
   return null;

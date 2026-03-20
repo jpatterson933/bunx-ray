@@ -1,8 +1,10 @@
+import { z } from "zod";
 import type { CellType } from "../treemap/schema.js";
 import { colorizeGrid } from "../color/service.js";
-import type { DrawOptionsType } from "./schema.js";
+import { DrawOptionsSchema, type DrawOptionsInputType } from "./schema.js";
 
-export const SHADES = ["░", "▒", "▓", "█"] as const;
+export const ShadeSchema = z.enum(["░", "▒", "▓", "█"]);
+export const SHADES = ShadeSchema.options;
 
 export function shadeIndex(size: number, max: number): number {
   if (max === 0) return 0;
@@ -67,9 +69,9 @@ export function draw(
   cells: CellType[],
   W = 80,
   H = 24,
-  opts: DrawOptionsType = {},
+  opts: DrawOptionsInputType = {},
 ): string {
-  const { color = false, labels = false, borders = true } = opts;
+  const { color, labels, borders } = DrawOptionsSchema.parse(opts);
 
   const grid: string[][] = Array.from({ length: H }, () => Array(W).fill(" "));
   if (cells.length === 0) return grid.map((r) => r.join("")).join("\n");

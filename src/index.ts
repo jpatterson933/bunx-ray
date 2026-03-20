@@ -3,12 +3,23 @@ export type { ModuleType } from "./modules/shared/schema.js";
 export type { CellType, RectangleType } from "./modules/treemap/schema.js";
 export { treemap } from "./modules/treemap/service.js";
 
-export type { DrawOptionsType } from "./modules/drawing/schema.js";
-export { SHADES, shadeFor, shadeIndex, draw } from "./modules/drawing/service.js";
+export type { DrawOptionsType, DrawOptionsInputType } from "./modules/drawing/schema.js";
+export {
+  ShadeSchema,
+  SHADES,
+  shadeFor,
+  shadeIndex,
+  draw,
+} from "./modules/drawing/service.js";
 
 export { colorForSize } from "./modules/color/service.js";
 
-export { formatSize, totalSize, topModules, maxSize } from "./modules/utils/service.js";
+export {
+  formatSize,
+  totalSize,
+  topModules,
+  maxSize,
+} from "./modules/utils/service.js";
 
 export type {
   ReportOptionsType,

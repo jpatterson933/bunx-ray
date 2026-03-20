@@ -2,10 +2,10 @@ import { z } from "zod";
 import { ModuleSchema } from "../shared/schema.js";
 
 export const CellSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-  w: z.number(),
-  h: z.number(),
+  x: z.int().nonnegative(),
+  y: z.int().nonnegative(),
+  w: z.int().positive(),
+  h: z.int().positive(),
   mod: ModuleSchema,
 });
 
