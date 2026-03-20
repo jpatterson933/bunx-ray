@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import type { CellType } from "../treemap/types.js";
-import type { ColorForSizeResponseType } from "./types.js";
+import type { CellType } from "../treemap/schema.js";
+import type { ColorForSizeResponseType } from "./schema.js";
 
 export function colorForSize(
   size: number,

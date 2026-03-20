@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { ModuleType } from "../shared/types.js";
+import type { ModuleType } from "../shared/schema.js";
 
 export function xray(dirPath: string): ModuleType[] {
   return fs

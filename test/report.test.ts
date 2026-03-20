@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { renderReport } from "../src/modules/report/service";
-import { SHADES } from "../src/modules/drawing/constants";
+import { SHADES } from "../src/modules/drawing/service";
 import type { ModuleType } from "../src/modules/shared/types";
 
 const sampleMods: ModuleType[] = [

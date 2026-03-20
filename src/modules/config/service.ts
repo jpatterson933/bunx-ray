@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { CONFIG_FILE_NAMES } from "./constants.js";
-import { ConfigSchema, type ConfigType } from "./types.js";
+import { ConfigSchema, type ConfigType } from "./schema.js";
+
+const CONFIG_FILE_NAMES = [".bunxrayrc.json", "bunxray.config.json"];
 
 export function loadConfig(cwd?: string): ConfigType | null {
   const dir = cwd ?? process.cwd();

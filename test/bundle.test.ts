@@ -10,7 +10,7 @@ import { draw, shadeFor, shadeIndex } from "../src/modules/drawing/service";
 beforeAll(() => {
   chalk.level = 3;
 });
-import { SHADES } from "../src/modules/drawing/constants";
+import { SHADES } from "../src/modules/drawing/service";
 import {
   formatSize,
   topModules,
