@@ -138,6 +138,45 @@ function runSizeChecks(
   };
 }
 
+const DEPRECATED_FLAGS: Record<string, string> = {
+  webpack: "--webpack is deprecated and will be removed in v2. Format is now auto-detected.",
+  vite: "--vite is deprecated and will be removed in v2. Format is now auto-detected.",
+  rollup: "--rollup is deprecated and will be removed in v2. Format is now auto-detected.",
+  esbuild: "--esbuild is deprecated and will be removed in v2. Format is now auto-detected.",
+  tsup: "--tsup is deprecated and will be removed in v2. Format is now auto-detected.",
+  labels: "--labels is deprecated and will be removed in v2.",
+  borders: "--no-borders is deprecated and will be removed in v2.",
+  color: "--no-color is deprecated and will be removed in v2.",
+  legend: "--no-legend is deprecated and will be removed in v2.",
+  summary: "--no-summary is deprecated and will be removed in v2.",
+  gridOnly: "--grid-only is deprecated and will be removed in v2.",
+  cols: "--cols is deprecated and will be removed in v2.",
+  rows: "--rows is deprecated and will be removed in v2.",
+  md: "--md is deprecated and will be removed in v2.",
+  json: "--json is deprecated and will be removed in v2.",
+  duplicates: "--no-duplicates is deprecated and will be removed in v2.",
+  top: "--top is deprecated and will be removed in v2.",
+  why: "--why is deprecated and will be removed in v2.",
+  groupByPackage: "--group-by-package is deprecated and will be removed in v2.",
+  saveSnapshot: "--save-snapshot is deprecated and will be removed in v2.",
+  snapshotFile: "--snapshot-file is deprecated and will be removed in v2.",
+};
+
+// Commander sets --no-X flags to `false` when passed, and `true` by default.
+// For positive flags it sets them to `true` when passed, `undefined` otherwise.
+const DEPRECATED_FLAG_NEGATED = new Set(["borders", "color", "legend", "summary", "duplicates"]);
+
+function warnDeprecated(opts: any): void {
+  for (const [key, message] of Object.entries(DEPRECATED_FLAGS)) {
+    const used = DEPRECATED_FLAG_NEGATED.has(key)
+      ? opts[key] === false  // --no-X was explicitly passed
+      : Boolean(opts[key]);  // positive flag was passed
+    if (used) {
+      process.stderr.write(chalk.yellow(`[bunx-ray] Deprecation warning: ${message}\n`));
+    }
+  }
+}
+
 function main() {
   const program = new Command();
 
@@ -156,7 +195,10 @@ function main() {
     .option("--tsup", "Input is tsup metafile")
     .option("--md", "Output as GitHub-Flavored Markdown")
     .option("--json", "Output as JSON")
-    .action((oldFile: string, newFile: string, opts: any) => {
+    .action((oldFile: string, newFile: string, opts: any, cmd: any) => {
+      // Commander v14 assigns options to the parent when both parent and subcommand
+      // define the same flag, so we need to merge both to catch all deprecated flags.
+      warnDeprecated({ ...opts, ...(cmd.parent?.opts() ?? {}) });
       try {
         const oldStats = parseStatsJson(oldFile);
         const newStats = parseStatsJson(newFile);
@@ -213,6 +255,7 @@ function main() {
       "Fail if total bundle exceeds total size (e.g. 500KB)",
     )
     .action((statsArg: string | undefined, opts: any) => {
+      warnDeprecated(opts);
       const config = loadConfig();
       const statsFile = statsArg ?? config?.stats;
       const top = Number(opts.top ?? config?.top ?? 10);
