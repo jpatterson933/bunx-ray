@@ -22,12 +22,11 @@ describe("loadConfig", () => {
     const tmpDir = makeTmpDir();
     fs.writeFileSync(
       path.join(tmpDir, ".bunxrayrc.json"),
-      JSON.stringify({ top: 15, size: "50KB" }),
+      JSON.stringify({ top: 15 }),
     );
     const config = loadConfig(tmpDir);
     expect(config).not.toBeNull();
     expect(config!.top).toBe(15);
-    expect(config!.size).toBe("50KB");
     fs.rmSync(tmpDir, { recursive: true });
   });
 
@@ -35,11 +34,11 @@ describe("loadConfig", () => {
     const tmpDir = makeTmpDir();
     fs.writeFileSync(
       path.join(tmpDir, "bunxray.config.json"),
-      JSON.stringify({ totalSize: "500KB" }),
+      JSON.stringify({ top: 20 }),
     );
     const config = loadConfig(tmpDir);
     expect(config).not.toBeNull();
-    expect(config!.totalSize).toBe("500KB");
+    expect(config!.top).toBe(20);
     fs.rmSync(tmpDir, { recursive: true });
   });
 
@@ -83,14 +82,4 @@ describe("loadConfig", () => {
     fs.rmSync(tmpDir, { recursive: true });
   });
 
-  it("supports format field", () => {
-    const tmpDir = makeTmpDir();
-    fs.writeFileSync(
-      path.join(tmpDir, ".bunxrayrc.json"),
-      JSON.stringify({ format: "webpack" }),
-    );
-    const config = loadConfig(tmpDir);
-    expect(config!.format).toBe("webpack");
-    fs.rmSync(tmpDir, { recursive: true });
-  });
 });
