@@ -17,12 +17,6 @@ const defaultOpts = {
   cols: 40,
   rows: 10,
   top: 10,
-  legend: true,
-  summary: true,
-  color: false,
-  labels: false,
-  borders: false,
-  duplicates: false,
 };
 
 describe("renderReport", () => {
@@ -45,16 +39,6 @@ describe("renderReport", () => {
     for (const line of lines) {
       expect(line.length).toBe(30);
     }
-  });
-
-  it("legend: false produces no legendLine", () => {
-    const report = renderReport(sampleMods, { ...defaultOpts, legend: false });
-    expect(report.legendLine).toBeUndefined();
-  });
-
-  it("summary: false produces no summaryLine", () => {
-    const report = renderReport(sampleMods, { ...defaultOpts, summary: false });
-    expect(report.summaryLine).toBeUndefined();
   });
 
   it("top limits tableLines to N entries plus header", () => {

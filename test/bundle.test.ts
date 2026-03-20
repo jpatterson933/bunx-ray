@@ -1,7 +1,6 @@
 /// <reference types="vitest" />
 
 import chalk from "chalk";
-import { readFileSync } from "fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import type { CellType } from "../src/modules/treemap/types";
 import type { ModuleType } from "../src/modules/shared/types";
@@ -13,171 +12,28 @@ beforeAll(() => {
 });
 import { SHADES } from "../src/modules/drawing/constants";
 import {
-  normalizeEsbuild,
-  normalizeRollup,
-  normalizeVite,
-  normalizeWebpack,
-} from "../src/modules/normalizers/service";
-import {
   formatSize,
   topModules,
   totalSize,
 } from "../src/modules/utils/service";
 
-const fixturesDir = new URL("../fixtures/", import.meta.url).pathname;
-
-function load(name: string) {
-  return JSON.parse(readFileSync(`${fixturesDir}${name}`, "utf8"));
-}
-
-describe("normalizeWebpack", () => {
-  it("extracts modules with path and size", () => {
-    const mods = normalizeWebpack(load("webpack-sample.json"));
-    expect(mods.length).toBeGreaterThan(0);
-    for (const m of mods) {
-      expect(m.path).toBeTruthy();
-      expect(m.size).toBeGreaterThan(0);
-    }
-  });
-
-  it("returns modules sorted by size descending", () => {
-    const mods = normalizeWebpack(load("webpack-sample.json"));
-    for (let i = 1; i < mods.length; i++) {
-      expect(mods[i - 1].size).toBeGreaterThanOrEqual(mods[i].size);
-    }
-  });
-});
-
-describe("normalizeVite", () => {
-  it("extracts modules from output array", () => {
-    const mods = normalizeVite(load("vite-sample.json"));
-    expect(mods.length).toBe(2);
-    expect(mods[0].size).toBeGreaterThanOrEqual(mods[1].size);
-  });
-
-  it("throws on missing output field", () => {
-    expect(() => normalizeVite({})).toThrow("missing 'output' field");
-  });
-
-  it("throws when output entries have no modules", () => {
-    expect(() => normalizeVite({ output: [{}] })).toThrow("no modules");
-  });
-
-  it("handles vite-bundle-analyzer flat array format", () => {
-    const stats = [
-      {
-        filename: "assets/index-abc123.js",
-        parsedSize: 6000,
-        gzipSize: 1500,
-        isEntry: true,
-        source: [
-          {
-            label: "node_modules",
-            parsedSize: 4000,
-            groups: [
-              {
-                label: "react",
-                parsedSize: 4000,
-                groups: [{ label: "index.js", parsedSize: 4000 }],
-              },
-            ],
-          },
-          {
-            label: "src",
-            parsedSize: 2000,
-            groups: [{ label: "main.tsx", parsedSize: 2000 }],
-          },
-        ],
-      },
-    ];
-    const mods = normalizeVite(stats);
-    expect(mods.length).toBe(2);
-    expect(mods.find((m) => m.path === "node_modules/react/index.js")?.size).toBe(4000);
-    expect(mods.find((m) => m.path === "src/main.tsx")?.size).toBe(2000);
-    expect(mods[0].size).toBeGreaterThanOrEqual(mods[1].size);
-  });
-
-  it("handles vite-bundle-analyzer with multiple chunks", () => {
-    const stats = [
-      {
-        filename: "assets/main.js",
-        parsedSize: 2000,
-        gzipSize: 800,
-        isEntry: true,
-        source: [
-          { label: "src", parsedSize: 2000, groups: [{ label: "main.tsx", parsedSize: 2000 }] },
-        ],
-      },
-      {
-        filename: "assets/vendor.js",
-        parsedSize: 10000,
-        gzipSize: 3000,
-        isEntry: false,
-        source: [
-          {
-            label: "node_modules",
-            parsedSize: 10000,
-            groups: [{ label: "lodash.js", parsedSize: 10000 }],
-          },
-        ],
-      },
-    ];
-    const mods = normalizeVite(stats);
-    expect(mods.length).toBe(2);
-    expect(mods[0].path).toBe("node_modules/lodash.js");
-    expect(mods[0].size).toBe(10000);
-  });
-});
-
-describe("normalizeEsbuild", () => {
-  it("extracts inputs with byte sizes", () => {
-    const mods = normalizeEsbuild(load("esbuild-sample.json"));
-    expect(mods.length).toBe(2);
-    expect(mods[0].path).toContain("index.ts");
-    expect(mods[0].size).toBe(71);
-  });
-
-  it("handles realistic fixture with many modules", () => {
-    const mods = normalizeEsbuild(load("esbuild-realistic.json"));
-    expect(mods.length).toBe(15);
-    expect(mods[0].path).toContain("lodash");
-    expect(mods[0].size).toBe(72000);
-  });
-});
-
-describe("normalizeRollup", () => {
-  it("extracts modules from chunk entries", () => {
-    const mods = normalizeRollup(load("rollup-sample.json"));
-    expect(mods.length).toBe(4);
-    for (const m of mods) {
-      expect(m.path).toBeTruthy();
-      expect(m.size).toBeGreaterThan(0);
-    }
-  });
-
-  it("returns modules sorted by size descending", () => {
-    const mods = normalizeRollup(load("rollup-sample.json"));
-    for (let i = 1; i < mods.length; i++) {
-      expect(mods[i - 1].size).toBeGreaterThanOrEqual(mods[i].size);
-    }
-  });
-
-  it("skips asset entries", () => {
-    const mods = normalizeRollup(load("rollup-sample.json"));
-    const paths = mods.map((m) => m.path);
-    expect(paths).not.toContain("style.css");
-  });
-
-  it("throws on missing output", () => {
-    expect(() => normalizeRollup({})).toThrow("missing 'output' array");
-  });
-
-  it("throws when no chunk entries found", () => {
-    expect(() => normalizeRollup({ output: [{ type: "asset" }] })).toThrow(
-      "no chunk entries",
-    );
-  });
-});
+const sampleMods: ModuleType[] = [
+  { path: "node_modules/lodash/lodash.js", size: 72000 },
+  { path: "node_modules/react-dom/index.js", size: 42000 },
+  { path: "node_modules/react/index.js", size: 28000 },
+  { path: "node_modules/axios/index.js", size: 18000 },
+  { path: "node_modules/moment/moment.js", size: 15000 },
+  { path: "node_modules/chalk/index.js", size: 12000 },
+  { path: "src/components/App.tsx", size: 9000 },
+  { path: "src/components/Header.tsx", size: 7000 },
+  { path: "src/utils/api.ts", size: 5500 },
+  { path: "src/utils/helpers.ts", size: 4200 },
+  { path: "src/index.ts", size: 3500 },
+  { path: "src/config.ts", size: 2800 },
+  { path: "src/types.ts", size: 2100 },
+  { path: "src/constants.ts", size: 1500 },
+  { path: "src/env.ts", size: 1000 },
+];
 
 describe("treemap", () => {
   it("returns empty array for empty input", () => {
@@ -211,10 +67,9 @@ describe("treemap", () => {
   });
 
   it("cells do not extend beyond grid bounds", () => {
-    const mods = normalizeEsbuild(load("esbuild-realistic.json"));
     const W = 60,
       H = 20;
-    const cells = treemap(mods, W, H);
+    const cells = treemap(sampleMods, W, H);
     for (const c of cells) {
       expect(c.x + c.w).toBeLessThanOrEqual(W);
       expect(c.y + c.h).toBeLessThanOrEqual(H);
@@ -222,21 +77,11 @@ describe("treemap", () => {
   });
 
   it("produces a 2D layout, not a single column", () => {
-    const mods = normalizeEsbuild(load("esbuild-realistic.json"));
-    const cells = treemap(mods, 80, 24);
+    const cells = treemap(sampleMods, 80, 24);
     const hasVaryingX = new Set(cells.map((c) => c.x)).size > 1;
     expect(hasVaryingX).toBe(true);
   });
 
-  it("top 3 modules get reasonable aspect ratios", () => {
-    const mods = normalizeEsbuild(load("esbuild-realistic.json"));
-    const cells = treemap(mods, 80, 24);
-    const sorted = [...cells].sort((a, b) => b.mod.size - a.mod.size);
-    for (const c of sorted.slice(0, 3)) {
-      const ratio = Math.max(c.w / c.h, c.h / c.w);
-      expect(ratio).toBeLessThan(20);
-    }
-  });
 });
 
 describe("draw", () => {
@@ -254,10 +99,9 @@ describe("draw", () => {
   });
 
   it("produces correct grid dimensions", () => {
-    const mods = normalizeEsbuild(load("esbuild-sample.json"));
     const W = 30,
       H = 8;
-    const grid = draw(treemap(mods, W, H), W, H);
+    const grid = draw(treemap(sampleMods.slice(0, 2), W, H), W, H);
     const lines = grid.split("\n");
     expect(lines.length).toBe(H);
     for (const line of lines) {

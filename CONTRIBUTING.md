@@ -15,7 +15,7 @@ npm run build
 npm test
 ```
 
-Tests use Vitest and require the `fixtures/` directory (included in the repo).
+Tests use Vitest.
 
 ## Project Structure
 
@@ -25,26 +25,16 @@ bunx-ray/
 │   ├── index.ts                 # Public API exports
 │   ├── cli.ts                   # CLI entry point
 │   └── modules/
-│       ├── shared/              # Shared types (ModuleType, ChunkType)
-│       ├── normalizers/         # Format normalizers (webpack, vite, rollup, esbuild)
+│       ├── shared/              # Shared types (ModuleType)
+│       ├── xray/                # Directory walker
 │       ├── treemap/             # Squarified treemap layout
 │       ├── drawing/             # ASCII grid rendering
 │       ├── color/               # Color gradient mapping
 │       ├── report/              # Report orchestration
 │       ├── utils/               # formatSize, totalSize, topModules
-│       ├── size/                # Size budget enforcement
-│       ├── diff/                # Build comparison
-│       ├── markdown/            # Markdown output (--md)
-│       ├── json-output/         # JSON output (--json)
-│       ├── config/              # Config file loading
-│       ├── duplicates/          # Duplicate module detection
-│       ├── chunks/              # Multi-chunk extraction
-│       ├── ci/                  # GitHub Actions annotations
-│       ├── snapshot/            # Historical snapshot tracking
-│       └── grouping/            # Package grouping
+│       └── config/              # Config file loading
 ├── dist/                        # Compiled output (gitignored)
-├── test/                        # Test suite
-└── fixtures/                    # Test fixtures (JSON stats files)
+└── test/                        # Test suite
 ```
 
 Each module follows the pattern: `service.ts` (logic), `types.ts` (Zod schemas), and optional `constants.ts`.
