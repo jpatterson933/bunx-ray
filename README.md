@@ -6,6 +6,8 @@
 
 ## Install & Run
 
+Requires Node.js `>=20`.
+
 ```bash
 # global (recommended)
 npm install -g bunx-ray

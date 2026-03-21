@@ -2,6 +2,8 @@
 
 ## Development Setup
 
+Requires Node.js `>=20`.
+
 ```bash
 git clone https://github.com/jpatterson933/bunx-ray.git
 cd bunx-ray
@@ -37,7 +39,7 @@ bunx-ray/
 └── test/                        # Test suite
 ```
 
-Each module follows the pattern: `service.ts` (logic), `types.ts` (Zod schemas), and optional `constants.ts`.
+Each module follows the pattern: `service.ts` (logic), `schema.ts` (Zod schemas), and optional `constants.ts`.
 
 ## Code Style
 

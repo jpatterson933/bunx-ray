@@ -17,5 +17,5 @@ npm publish --dry-run
 
 ```bash
 npm view bunx-ray version
-npx bunx-ray --help
+npx bunx-ray@latest --help
 ```
