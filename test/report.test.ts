@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { renderReport } from "../src/modules/report/service";
 import { SHADES } from "../src/modules/drawing/service";
-import type { ModuleType } from "../src/modules/shared/types";
+import type { ModuleType } from "../src/modules/shared/schema";
 
 const sampleMods: ModuleType[] = [
   { path: "node_modules/lodash/index.js", size: 72000 },
@@ -94,5 +94,15 @@ describe("renderReport", () => {
     const report = renderReport(single, { ...defaultOpts, top: 1 });
     expect(report.tableLines.length).toBe(2);
     expect(report.tableLines[1]).toMatch(/100\.0%/);
+  });
+
+  it("uses 0.0% when total size is zero", () => {
+    const zeroMods: ModuleType[] = [
+      { path: "a.js", size: 0 },
+      { path: "b.js", size: 0 },
+    ];
+    const report = renderReport(zeroMods, { ...defaultOpts, top: 2 });
+    expect(report.tableLines[1]).toContain("( 0.0%)");
+    expect(report.tableLines[2]).toContain("( 0.0%)");
   });
 });

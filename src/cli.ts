@@ -40,7 +40,11 @@ function main() {
       const config = ConfigSchema.parse(loadConfig() ?? {});
       const cols = process.stdout.columns || 80;
       const rows = Math.min(process.stdout.rows || 24, 40);
-      const opts = ReportOptionsSchema.parse({ cols, rows, top: config.top });
+      const opts = ReportOptionsSchema.parse({
+        cols,
+        rows,
+        top: config.top,
+      });
 
       try {
         const modules = resolveModules(dirArg);

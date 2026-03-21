@@ -15,8 +15,6 @@ export function renderReport(
 
   const grid = draw(treemap(modules, cols, rows), cols, rows, {
     color: true,
-    labels: false,
-    borders: true,
   });
 
   const t1 = max * 0.25;
@@ -45,7 +43,8 @@ export function renderReport(
     const m = list[idx];
     const shade = shadeFor(m.size, max);
     const coloredShade = colorForSize(m.size, max)(shade);
-    const pct = ((m.size / total) * 100).toFixed(1).padStart(4);
+    const pctValue = total === 0 ? 0 : (m.size / total) * 100;
+    const pct = pctValue.toFixed(1).padStart(4);
     const name =
       m.path.length > 28 ? "…" + m.path.slice(-27) : m.path.padEnd(28);
     tableLines.push(
