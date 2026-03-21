@@ -2,8 +2,8 @@
 
 import chalk from "chalk";
 import { beforeAll, describe, expect, it } from "vitest";
-import type { CellType } from "../src/modules/treemap/types";
-import type { ModuleType } from "../src/modules/shared/types";
+import type { CellType } from "../src/modules/treemap/schema";
+import type { ModuleType } from "../src/modules/shared/schema";
 import { treemap } from "../src/modules/treemap/service";
 import { draw, shadeFor, shadeIndex } from "../src/modules/drawing/service";
 
@@ -81,7 +81,6 @@ describe("treemap", () => {
     const hasVaryingX = new Set(cells.map((c) => c.x)).size > 1;
     expect(hasVaryingX).toBe(true);
   });
-
 });
 
 describe("draw", () => {
@@ -119,58 +118,12 @@ describe("draw", () => {
     }
   });
 
-  it("draws borders between adjacent cells", () => {
-    const cells: CellType[] = [
-      { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
-      { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
-    ];
-    const grid = draw(cells, 10, 4, { borders: true });
-    const lines = grid.split("\n");
-    for (const line of lines) {
-      expect(line[4]).toBe("│");
-    }
-  });
-
-  it("no-borders option disables borders", () => {
-    const cells: CellType[] = [
-      { x: 0, y: 0, w: 5, h: 4, mod: { path: "a", size: 100 } },
-      { x: 5, y: 0, w: 5, h: 4, mod: { path: "b", size: 50 } },
-    ];
-    const grid = draw(cells, 10, 4, { borders: false });
-    const lines = grid.split("\n");
-    for (const line of lines) {
-      expect(line).not.toContain("│");
-    }
-  });
-
-  it("overlays labels on large cells", () => {
-    const cells: CellType[] = [
-      {
-        x: 0,
-        y: 0,
-        w: 20,
-        h: 5,
-        mod: { path: "node_modules/lodash.js", size: 100 },
-      },
-    ];
-    const grid = draw(cells, 20, 5, { labels: true, borders: false });
-    expect(grid).toContain("lodash.js");
-  });
-
-  it("does not label small cells", () => {
-    const cells: CellType[] = [
-      { x: 0, y: 0, w: 8, h: 2, mod: { path: "tiny.js", size: 100 } },
-    ];
-    const grid = draw(cells, 8, 2, { labels: true, borders: false });
-    expect(grid).not.toContain("tiny.js");
-  });
-
   it("color option produces ANSI escape codes", () => {
     const cells: CellType[] = [
       { x: 0, y: 0, w: 10, h: 3, mod: { path: "a", size: 100 } },
     ];
-    const plain = draw(cells, 10, 3, { color: false, borders: false });
-    const colored = draw(cells, 10, 3, { color: true, borders: false });
+    const plain = draw(cells, 10, 3, { color: false });
+    const colored = draw(cells, 10, 3, { color: true });
     expect(colored.length).toBeGreaterThan(plain.length);
   });
 });

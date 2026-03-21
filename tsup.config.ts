@@ -8,6 +8,6 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   clean: true,
-  target: "node18",
+  target: "node20",
   minify: true,
 });

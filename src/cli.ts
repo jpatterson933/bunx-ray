@@ -33,16 +33,21 @@ function main() {
     .name("bunx-ray")
     .description("ASCII heat-map bundle viewer")
     .version(VERSION, "-v, --version");
+  program.option("--all", "Show all files in report table");
 
   program
     .argument("<dir>", "Bundled output directory")
     .action((dirArg: string) => {
-      const config = ConfigSchema.parse(loadConfig() ?? {});
-      const cols = process.stdout.columns || 80;
-      const rows = Math.min(process.stdout.rows || 24, 40);
-      const opts = ReportOptionsSchema.parse({ cols, rows, top: config.top });
-
       try {
+        const config = ConfigSchema.parse(loadConfig() ?? {});
+        const cols = process.stdout.columns || 80;
+        const rows = Math.min(process.stdout.rows || 24, 40);
+        const all = program.opts<{ all?: boolean }>().all ?? false;
+        const opts = ReportOptionsSchema.parse({
+          cols,
+          rows,
+          top: all ? Number.MAX_SAFE_INTEGER : config.top,
+        });
         const modules = resolveModules(dirArg);
 
         if (modules.length === 0) {

@@ -6,6 +6,8 @@
 
 ## Install & Run
 
+Requires Node.js `>=20`.
+
 ```bash
 # global (recommended)
 npm install -g bunx-ray
@@ -20,6 +22,7 @@ Point it at any directory:
 bunx-ray ./dist
 bunx-ray ./node_modules
 bunx-ray ./
+bunx-ray --all ./dist
 ```
 
 ---
@@ -30,10 +33,11 @@ bunx-ray ./
 bunx-ray <dir>
 ```
 
-| Flag             | Description  |
-| ---------------- | ------------ |
-| `-v, --version`  | Show version |
-| `-h, --help`     | Show help    |
+| Flag            | Description                      |
+| --------------- | -------------------------------- |
+| `--all`         | Show all files in the table list |
+| `-v, --version` | Show version                     |
+| `-h, --help`    | Show help                        |
 
 ---
 
@@ -47,10 +51,9 @@ Create a `.bunxrayrc.json` or `bunxray.config.json` in your project root to set 
 }
 ```
 
-| Field    | Type      | Description                  |
-| -------- | --------- | ---------------------------- |
-| `top`    | `number`  | Number of top files to show  |
-| `labels` | `boolean` | Show labels on treemap cells |
+| Field | Type     | Description                 |
+| ----- | -------- | --------------------------- |
+| `top` | `number` | Number of top files to show |
 
 ---
 
@@ -62,7 +65,7 @@ import { xray, treemap, draw, renderReport } from "bunx-ray";
 const mods = xray("./dist");
 
 // Low-level
-console.log(draw(treemap(mods, 80, 24), 80, 24, { color: true, labels: true }));
+console.log(draw(treemap(mods, 80, 24), 80, 24, { color: true }));
 
 // High-level
 const report = renderReport(mods, { cols: 80, rows: 24, top: 10 });

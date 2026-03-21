@@ -52,6 +52,15 @@ describe("CLI", () => {
     const { stdout } = await execa("node", [cli, "--version"]);
     expect(stdout).toMatch(/^\d+\.\d+\.\d+$/);
   });
+
+  it("shows all modules when using --all", async () => {
+    const files = Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [`f${i}.js`, 100 + i]),
+    );
+    const dir = makeBundleDir(files);
+    const { stdout } = await execa("node", [cli, "--all", dir]);
+    expect(stdout).toMatch(/Top 12 modules/);
+  });
 });
 
 describe("CLI error handling", () => {
@@ -78,5 +87,13 @@ describe("CLI error handling", () => {
     const result = await execa("node", [cli, dir], { reject: false });
     expect(result.exitCode).not.toBe(0);
     expect(result.stderr).toMatch(/No files found/);
+  });
+
+  it("exits with a clean error for invalid config JSON", async () => {
+    const dir = makeBundleDir({ "index.js": 10 });
+    fs.writeFileSync(path.join(dir, ".bunxrayrc.json"), "not valid json");
+    const result = await execa("node", [cli, "."], { cwd: dir, reject: false });
+    expect(result.exitCode).not.toBe(0);
+    expect(result.stderr).toMatch(/Invalid JSON in \.bunxrayrc\.json/);
   });
 });
