@@ -13,7 +13,12 @@ export function loadConfig(cwd?: string): ConfigType | null {
     if (!fs.existsSync(filePath)) continue;
 
     const raw = fs.readFileSync(filePath, "utf8");
-    const parsed = JSON.parse(raw);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      throw new Error(`Invalid JSON in ${name}`);
+    }
     const result = ConfigSchema.safeParse(parsed);
     if (!result.success) {
       const tree = z.treeifyError(result.error);
