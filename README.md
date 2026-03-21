@@ -22,6 +22,7 @@ Point it at any directory:
 bunx-ray ./dist
 bunx-ray ./node_modules
 bunx-ray ./
+bunx-ray --all ./dist
 ```
 
 ---
@@ -32,10 +33,11 @@ bunx-ray ./
 bunx-ray <dir>
 ```
 
-| Flag            | Description  |
-| --------------- | ------------ |
-| `-v, --version` | Show version |
-| `-h, --help`    | Show help    |
+| Flag            | Description                      |
+| --------------- | -------------------------------- |
+| `--all`         | Show all files in the table list |
+| `-v, --version` | Show version                     |
+| `-h, --help`    | Show help                        |
 
 ---
 

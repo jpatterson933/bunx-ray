@@ -52,6 +52,15 @@ describe("CLI", () => {
     const { stdout } = await execa("node", [cli, "--version"]);
     expect(stdout).toMatch(/^\d+\.\d+\.\d+$/);
   });
+
+  it("shows all modules when using --all", async () => {
+    const files = Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [`f${i}.js`, 100 + i]),
+    );
+    const dir = makeBundleDir(files);
+    const { stdout } = await execa("node", [cli, "--all", dir]);
+    expect(stdout).toMatch(/Top 12 modules/);
+  });
 });
 
 describe("CLI error handling", () => {
