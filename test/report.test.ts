@@ -48,9 +48,9 @@ describe("renderReport", () => {
 
   it("top limits listed files and accounts for the rest in Other", () => {
     const report = renderReport(sampleMods, { ...defaultOpts, top: 3 });
-    expect(report.tableLines[0]).toBe("Top 3 files");
+    expect(report.tableLines[0]).toBe("Top 3 of 5 files");
     expect(report.tableLines).toHaveLength(5);
-    expect(report.tableLines.at(-1)).toContain("Other:");
+    expect(report.tableLines.at(-1)).toContain("Other total:");
   });
 
   it("table lines contain shade characters", () => {
@@ -135,7 +135,9 @@ describe("renderReport", () => {
     expect(report.summaryLine).toBe("Total: 1.2 KB | 101 files");
     expect(report.grid).toContain("[1]");
     expect(report.grid).toContain("[O]");
-    expect(report.tableLines.at(-1)).toBe("[O] Other: 100 files, 200 B");
+    expect(report.tableLines.at(-1)).toBe(
+      "Other group total: 100 files, 200 B (includes [O] rows)",
+    );
     expect(report.tableLines[2]).toMatch(/\[O\].*tiny-0\.js/);
   });
 
@@ -159,8 +161,72 @@ describe("renderReport", () => {
     expect(report.grid).toContain("[1]");
     expect(report.grid).toContain("[O]");
     expect(report.tableLines[1]).toMatch(/\[1\].*Other/);
-    expect(report.tableLines.at(-1)).toBe("[O] Other: 2 files, 100 B");
+    expect(report.tableLines.at(-1)).toBe("Other group total: 2 files, 100 B");
   });
+
+  it("explains overlapping Other rows even in a narrow report", () => {
+    const mods = [
+      { path: "main.js", size: 1000 },
+      ...Array.from({ length: 100 }, (_, i) => ({
+        path: `tiny-${i}.js`,
+        size: 2,
+      })),
+    ];
+    const report = renderReport(mods, { cols: 40, rows: 10, top: 5 });
+    expect(report.tableLines.at(-1)).toBe(
+      "Other total: 200 B (includes [O] rows)",
+    );
+  });
+
+  it("offers the existing all-files option only when more files are hidden and the hint fits", () => {
+    const wide = renderReport(sampleMods, { cols: 80, rows: 10, top: 3 });
+    const narrow = renderReport(sampleMods, { cols: 40, rows: 10, top: 3 });
+    const complete = renderReport(sampleMods, { cols: 80, rows: 10, top: 10 });
+    expect(wide.tableLines[0]).toBe(
+      "Top 3 of 5 files (--all to list every file)",
+    );
+    expect(narrow.tableLines[0]).toBe("Top 3 of 5 files");
+    expect(complete.tableLines[0]).toBe("Top 5 of 5 files");
+  });
+
+  it.each([
+    [1, "<0.1%"],
+    [9, "<0.1%"],
+    [10, " 0.1%"],
+    [0, " 0.0%"],
+  ])(
+    "formats a %i-byte share without rounding positive values to zero",
+    (size, expected) => {
+      const mods = [
+        { path: "main.js", size: 10000 - size },
+        { path: "tiny.js", size },
+      ];
+      const report = renderReport(mods, { cols: 80, rows: 10, top: 2 });
+      expect(report.tableLines[2]).toContain(`(${expected})`);
+      expect(textWidth(report.tableLines[2])).toBeLessThanOrEqual(80);
+    },
+  );
+
+  it("identifies the directory without changing totals", () => {
+    const report = renderReport([{ path: "main.js", size: 1024 ** 3 * 2 }], {
+      cols: 80,
+      rows: 10,
+      top: 10,
+      directory: "dist",
+    });
+    expect(report.summaryLine).toBe("dist/ | Total: 2.0 GB | 1 files");
+  });
+
+  it.each(["assets/界面/very-long-directory/dist", "/", "dist/", "bad\nname"])(
+    "keeps directory summaries within the terminal width for %s",
+    (directory) => {
+      const report = renderReport(sampleMods, { ...defaultOpts, directory });
+      expect(textWidth(report.summaryLine)).toBeLessThanOrEqual(40);
+      expect(report.summaryLine).toContain("Total: 81.2 KB | 5 files");
+      expect(report.summaryLine).not.toContain("\n");
+      expect(report.summaryLine).not.toContain("//");
+    },
+  );
 });
 
 describe("terminal report", () => {
@@ -177,7 +243,12 @@ describe("terminal report", () => {
     [10, 5],
   ])("fits a %ix%i terminal", (cols, rows) => {
     const output = stripVTControlCharacters(
-      renderTerminalReport(mods, { cols, rows, top: 10 }),
+      renderTerminalReport(mods, {
+        cols,
+        rows,
+        top: 10,
+        directory: "build/assets/界面",
+      }),
     );
     const lines = output.split("\n");
     expect(lines.length).toBeLessThan(rows);
@@ -190,7 +261,8 @@ describe("terminal report", () => {
       { cols: 80, rows: 24, top: 10 },
       true,
     );
-    expect(output).toContain("Top 50 files");
+    expect(output).toContain("Top 50 of 50 files");
+    expect(output).not.toContain("--all");
     expect(output).toContain("component-49.js");
     expect(output).toContain("component-0.js");
     expect(output.split("\n").length).toBeGreaterThan(24);

@@ -53,6 +53,17 @@ describe("CLI", () => {
     expect(stdout).toMatch(/^\d+\.\d+\.\d+$/);
   });
 
+  it("identifies the scanned directory in the summary", async () => {
+    const project = makeTmpDir();
+    fs.mkdirSync(path.join(project, "dist"));
+    fs.writeFileSync(
+      path.join(project, "dist", "index.js"),
+      Buffer.alloc(1024),
+    );
+    const { stdout } = await execa("node", [cli, "./dist"], { cwd: project });
+    expect(stdout.split("\n")[0]).toBe("dist/ | Total: 1.0 KB | 1 files");
+  });
+
   it.each([
     [80, 24],
     [40, 16],
@@ -82,7 +93,7 @@ describe("CLI", () => {
     );
     const dir = makeBundleDir(files);
     const { stdout } = await execa("node", [cli, "--all", dir]);
-    expect(stdout).toMatch(/Top 12 files/);
+    expect(stdout).toMatch(/Top 12 of 12 files/);
   });
 });
 

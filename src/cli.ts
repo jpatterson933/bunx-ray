@@ -47,6 +47,7 @@ function main() {
           cols,
           rows,
           top: all ? Number.MAX_SAFE_INTEGER : config.top,
+          directory: path.normalize(dirArg),
         });
         const modules = resolveModules(dirArg);
 

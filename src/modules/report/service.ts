@@ -8,7 +8,7 @@ import {
   totalSize,
   maxSize,
 } from "../utils/service.js";
-import { fitPath, fitText, padText } from "../text/service.js";
+import { fitPath, fitText, padText, textWidth } from "../text/service.js";
 import type { RenderedReportType, ReportOptionsType } from "./schema.js";
 
 export function renderReport(
@@ -32,11 +32,13 @@ export function renderReport(
       : "[#] file  [O] Other",
     cols,
   );
-  const summaryLine = fitText(
-    `Total: ${formatSize(total)} | ${modules.length} files`,
+  const summaryLine = renderSummary(
+    total,
+    modules.length,
     cols,
+    opts.directory,
   );
-  const tableLines = [fitText(`Top ${list.length} files`, cols)];
+  const tableLines = [renderTableHeading(list.length, modules.length, cols)];
 
   for (const mod of list) {
     const label = labels.get(mod) ?? (mod.size > 0 ? "[O]" : " - ");
@@ -46,12 +48,18 @@ export function renderReport(
   if (otherCount > 0) {
     const otherCell = cells.find((cell) => cell.mod === other);
     const size = formatSize(other.size);
-    const note = otherCell?.label
-      ? `[O] Other: ${otherCount} files, ${size}`
-      : otherCell
-        ? `Other: ${otherCount} files, ${size} (unlabeled on map)`
-        : `Other: ${otherCount} files, ${size} (below map resolution)`;
-    tableLines.push(fitText(note, cols));
+    const includesListedFiles = list.some(
+      (mod) => mod.size > 0 && !labels.has(mod),
+    );
+    const notes: string[] = [];
+    if (includesListedFiles) notes.push("includes [O] rows");
+    if (!otherCell) notes.push("below map resolution");
+    const explanation = notes.length > 0 ? ` (${notes.join("; ")})` : "";
+    const note = `Other group total: ${otherCount} files, ${size}${explanation}`;
+    const compactNote = `Other total: ${size}${explanation}`;
+    tableLines.push(
+      textWidth(note) <= cols ? note : fitText(compactNote, cols),
+    );
   }
 
   return { legendLine, summaryLine, grid, tableLines };
@@ -70,7 +78,7 @@ export function renderTerminalReport(
   const rows = all
     ? Math.max(4, Math.min(12, availableRows - 10))
     : Math.max(0, Math.min(12, availableRows - tableRows - 4));
-  const report = renderReport(modules, { cols: opts.cols, rows, top });
+  const report = renderReport(modules, { ...opts, rows, top });
   const lines = [report.summaryLine, report.legendLine];
   if (rows > 0) lines.push("", report.grid, "");
   lines.push(...report.tableLines);
@@ -79,6 +87,34 @@ export function renderTerminalReport(
     return output.slice(0, availableRows).join("\n");
   }
   return output.join("\n");
+}
+
+function renderSummary(
+  total: number,
+  count: number,
+  cols: number,
+  directory?: string,
+): string {
+  const summary = `Total: ${formatSize(total)} | ${count} files`;
+  if (!directory) return fitText(summary, cols);
+
+  const cleanDirectory = directory.replace(/[\\/]+$/, "") || directory;
+  const directoryWidth = Math.max(1, cols - textWidth(summary) - 4);
+  const name = fitPath(cleanDirectory, directoryWidth);
+  const label = /[\\/]$/.test(name) ? name : name + "/";
+  return fitText(`${label} | ${summary}`, cols);
+}
+
+function renderTableHeading(
+  shown: number,
+  total: number,
+  cols: number,
+): string {
+  const heading = `Top ${shown} of ${total} files`;
+  const withHint = `${heading} (--all to list every file)`;
+  return shown < total && textWidth(withHint) <= cols
+    ? withHint
+    : fitText(heading, cols);
 }
 
 function createLabeledMap(
@@ -145,7 +181,8 @@ function renderFileLine(
   cols: number,
 ): string {
   const size = formatSize(mod.size);
-  const percent = `${(total === 0 ? 0 : (mod.size / total) * 100).toFixed(1)}%`;
+  const share = total === 0 ? 0 : (mod.size / total) * 100;
+  const percent = share > 0 && share < 0.1 ? "<0.1%" : `${share.toFixed(1)}%`;
   const shade = colorForSize(mod.size, max)(shadeFor(mod.size, max));
   const prefix = `${label.padStart(3)} ${shade} `;
   const prefixWidth = Math.max(3, label.length) + 3;

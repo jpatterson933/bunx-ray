@@ -4,6 +4,7 @@ export const ReportOptionsSchema = z.object({
   cols: z.number().int().positive(),
   rows: z.number().int().positive(),
   top: z.number().int().positive(),
+  directory: z.string().optional(),
 });
 
 export const RenderedReportSchema = z.object({

@@ -8,6 +8,8 @@ Run `bunx-ray ./dist`. Numbers connect the map to the file list, and the report 
 
 Rectangle area represents file size on disk. Small files and files outside the displayed list share an **Other** region; `[O]` beside a filename means it belongs to that group. Groups below the map's resolution are reported without being enlarged. Empty files stay in the list but take no map area.
 
+The summary identifies the scanned directory, and `Top 8 of 30 files` tells you how much of the list is visible. The **Other group total** includes any `[O]` rows already listed above it. Large sizes use GB, and tiny nonzero shares display as `<0.1%`.
+
 ---
 
 ## Install & Run
@@ -76,7 +78,12 @@ const mods = xray("./dist");
 console.log(draw(treemap(mods, 80, 24), 80, 24, { color: true }));
 
 // High-level
-const report = renderReport(mods, { cols: 80, rows: 24, top: 10 });
+const report = renderReport(mods, {
+  cols: 80,
+  rows: 24,
+  top: 10,
+  directory: "./dist", // Optional label for the summary
+});
 ```
 
 For `renderReport`, `cols` and `rows` set the map dimensions; the CLI also budgets space for the summary and file list. Low-level `treemap` omits empty files and rectangles that round to zero terminal cells. `renderReport` groups small files and reports their combined size.

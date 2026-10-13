@@ -245,6 +245,12 @@ describe("formatSize", () => {
   it("formats megabytes", () => {
     expect(formatSize(1024 * 1024 * 3.5)).toBe("3.5 MB");
   });
+
+  it("switches to gigabytes at one GB", () => {
+    expect(formatSize(1024 ** 3 - 1024 ** 2)).toBe("1023.0 MB");
+    expect(formatSize(1024 ** 3)).toBe("1.0 GB");
+    expect(formatSize(1024 ** 3 * 2.5)).toBe("2.5 GB");
+  });
 });
 
 describe("totalSize", () => {
