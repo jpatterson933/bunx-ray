@@ -49,7 +49,7 @@ describe("treemap", () => {
     expect(cells[0].h).toBe(10);
   });
 
-  it("every module gets a visible cell", () => {
+  it("gives visible cells to files that fit on the canvas", () => {
     const mods: ModuleType[] = Array.from({ length: 20 }, (_, i) => ({
       path: `mod-${i}.js`,
       size: (20 - i) * 1000,
@@ -80,6 +80,70 @@ describe("treemap", () => {
     const cells = treemap(sampleMods, 80, 24);
     const hasVaryingX = new Set(cells.map((c) => c.x)).size > 1;
     expect(hasVaryingX).toBe(true);
+  });
+
+  it("does not assign area to empty files", () => {
+    const cells = treemap(
+      [
+        { path: "main.js", size: 100 },
+        { path: "empty.js", size: 0 },
+      ],
+      20,
+      5,
+    );
+    expect(cells).toEqual([
+      { x: 0, y: 0, w: 20, h: 5, mod: { path: "main.js", size: 100 } },
+    ]);
+  });
+
+  it("does not inflate files smaller than a terminal cell", () => {
+    const mods = [
+      { path: "main.js", size: 100000 },
+      ...Array.from({ length: 30 }, (_, i) => ({ path: `tiny-${i}`, size: 1 })),
+    ];
+    const cells = treemap(mods, 20, 5);
+    expect(cells).toHaveLength(1);
+    expect(cells[0].mod.path).toBe("main.js");
+    expect(cells[0].w * cells[0].h).toBe(100);
+  });
+
+  it("preserves exact proportions when the canvas can represent them", () => {
+    const mods = [50, 25, 25].map((size, index) => ({
+      path: String(index),
+      size,
+    }));
+    const cells = treemap(mods, 20, 10);
+    expect(cells.map((cell) => cell.w * cell.h)).toEqual([100, 50, 50]);
+  });
+
+  it.each([
+    [1, 1],
+    [2, 7],
+    [20, 5],
+    [80, 24],
+  ])("tiles a %ix%i canvas without overlaps or gaps", (width, height) => {
+    for (const count of [1, 20, 200, 2000]) {
+      const mods = Array.from({ length: count }, (_, i) => ({
+        path: `file-${i}`,
+        size: ((i * 7919) % 1000) + 1,
+      }));
+      const cells = treemap(mods, width, height);
+      const occupied = new Set<string>();
+      for (const cell of cells) {
+        expect(cell.x).toBeGreaterThanOrEqual(0);
+        expect(cell.y).toBeGreaterThanOrEqual(0);
+        expect(cell.x + cell.w).toBeLessThanOrEqual(width);
+        expect(cell.y + cell.h).toBeLessThanOrEqual(height);
+        for (let y = cell.y; y < cell.y + cell.h; y++) {
+          for (let x = cell.x; x < cell.x + cell.w; x++) {
+            const position = `${x}:${y}`;
+            expect(occupied.has(position)).toBe(false);
+            occupied.add(position);
+          }
+        }
+      }
+      expect(occupied.size).toBe(width * height);
+    }
   });
 });
 
@@ -125,6 +189,25 @@ describe("draw", () => {
     const plain = draw(cells, 10, 3, { color: false });
     const colored = draw(cells, 10, 3, { color: true });
     expect(colored.length).toBeGreaterThan(plain.length);
+  });
+
+  it("centers labels inside their own rectangles", () => {
+    const cells = treemap(
+      [
+        { path: "a", size: 50 },
+        { path: "b", size: 50 },
+      ],
+      20,
+      6,
+    ).map((cell, index) => ({ ...cell, label: `[${index + 1}]` }));
+    const lines = draw(cells, 20, 6).split("\n");
+    for (const cell of cells) {
+      const region = lines
+        .slice(cell.y, cell.y + cell.h)
+        .map((line) => line.slice(cell.x, cell.x + cell.w))
+        .join("\n");
+      expect(region).toContain(cell.label);
+    }
   });
 });
 

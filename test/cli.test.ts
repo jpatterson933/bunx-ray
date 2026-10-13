@@ -44,13 +44,36 @@ describe("CLI", () => {
   it("prints legend and summary", async () => {
     const dir = makeBundleDir(sampleFiles);
     const { stdout } = await execa("node", [cli, dir]);
-    expect(stdout).toMatch(/Legend/);
-    expect(stdout).toMatch(/Total bundle/);
+    expect(stdout).toContain("[#] file");
+    expect(stdout).toContain("Total:");
   });
 
   it("prints --version", async () => {
     const { stdout } = await execa("node", [cli, "--version"]);
     expect(stdout).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  it.each([
+    [80, 24],
+    [40, 16],
+  ])("fits the complete output to a %ix%i terminal", async (cols, rows) => {
+    const dir = makeBundleDir(sampleFiles);
+    const setup = `Object.defineProperty(process.stdout, 'columns', {value: ${cols}}); Object.defineProperty(process.stdout, 'rows', {value: ${rows}});`;
+    const { stdout } = await execa(
+      "node",
+      [
+        "--import",
+        `data:text/javascript,${encodeURIComponent(setup)}`,
+        cli,
+        dir,
+      ],
+      { env: { NO_COLOR: "1", FORCE_COLOR: undefined } },
+    );
+    const lines = stdout.split("\n");
+    expect(lines.length).toBeLessThan(rows);
+    expect(lines.every((line) => line.length <= cols)).toBe(true);
+    expect(stdout).toContain("[1]");
+    expect(stdout).toContain("vendor/lodash.js");
   });
 
   it("shows all modules when using --all", async () => {
@@ -59,7 +82,7 @@ describe("CLI", () => {
     );
     const dir = makeBundleDir(files);
     const { stdout } = await execa("node", [cli, "--all", dir]);
-    expect(stdout).toMatch(/Top 12 modules/);
+    expect(stdout).toMatch(/Top 12 files/);
   });
 });
 

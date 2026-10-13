@@ -19,6 +19,13 @@ npm test
 
 Tests use Vitest.
 
+To regenerate the README terminal image from the built CLI and its sample directory:
+
+```bash
+npm run build
+node scripts/render-demo.mjs
+```
+
 ## Project Structure
 
 ```

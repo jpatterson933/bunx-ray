@@ -43,6 +43,15 @@ export function draw(
         }
       }
     }
+    if (c.label && c.label.length <= c.w) {
+      const y = c.y + Math.floor((c.h - 1) / 2);
+      const x = c.x + Math.floor((c.w - c.label.length) / 2);
+      for (const [offset, char] of [...c.label].entries()) {
+        if (y >= 0 && y < H && x + offset >= 0 && x + offset < W) {
+          grid[y][x + offset] = char;
+        }
+      }
+    }
   }
 
   if (color) return colorizeGrid(grid, cellMap, max);

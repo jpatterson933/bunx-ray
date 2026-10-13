@@ -2,11 +2,17 @@
 
 **ASCII heat-map for any directory.** See what's taking up space, right in your terminal.
 
+![A bunx-ray report with numbered file regions and smaller files grouped as Other](docs/demo.svg)
+
+Run `bunx-ray ./dist`. Numbers connect the map to the file list, and the report fits your terminal automatically.
+
+Rectangle area represents file size on disk. Small files and files outside the displayed list share an **Other** region; `[O]` beside a filename means it belongs to that group. Groups below the map's resolution are reported without being enlarged. Empty files stay in the list but take no map area.
+
 ---
 
 ## Install & Run
 
-Requires Node.js `>=20`.
+Requires Node.js `>=20`. Bun is not required.
 
 ```bash
 # global (recommended)
@@ -51,9 +57,11 @@ Create a `.bunxrayrc.json` or `bunxray.config.json` in your project root to set 
 }
 ```
 
-| Field | Type     | Description                 |
-| ----- | -------- | --------------------------- |
-| `top` | `number` | Number of top files to show |
+| Field | Type     | Description                                       |
+| ----- | -------- | ------------------------------------------------- |
+| `top` | `number` | Maximum number of top files to show (default: 10) |
+
+The default report shows fewer files in short terminals so the map and list fit together. `--all` always lists every file and can scroll beyond one screen. Long paths keep their filename and as much directory context as space allows.
 
 ---
 
@@ -70,6 +78,8 @@ console.log(draw(treemap(mods, 80, 24), 80, 24, { color: true }));
 // High-level
 const report = renderReport(mods, { cols: 80, rows: 24, top: 10 });
 ```
+
+For `renderReport`, `cols` and `rows` set the map dimensions; the CLI also budgets space for the summary and file list. Low-level `treemap` omits empty files and rectangles that round to zero terminal cells. `renderReport` groups small files and reports their combined size.
 
 All `.d.ts` files ship with the package.
 

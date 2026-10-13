@@ -24,6 +24,7 @@ export function colorizeGrid(
         .map((char, x) => {
           const cell = cellMap[y][x];
           if (!cell || char === " ") return char;
+          if (!/[░▒▓█]/.test(char)) return chalk.bold.inverse(char);
           return colorForSize(cell.mod.size, max)(char);
         })
         .join(""),

@@ -4,7 +4,7 @@ import { Command } from "commander";
 import fs from "fs";
 import path from "path";
 
-import { renderReport } from "./modules/report/service.js";
+import { renderTerminalReport } from "./modules/report/service.js";
 import { ReportOptionsSchema } from "./modules/report/schema.js";
 import { xray } from "./modules/xray/service.js";
 import { loadConfig } from "./modules/config/service.js";
@@ -55,13 +55,7 @@ function main() {
           process.exit(1);
         }
 
-        const report = renderReport(modules, opts);
-
-        console.log(report.legendLine);
-        console.log(report.summaryLine);
-
-        console.log("\n" + report.grid + "\n");
-        report.tableLines.forEach((l) => console.log(l));
+        console.log(renderTerminalReport(modules, opts, all));
       } catch (err: any) {
         console.error(err.message);
         process.exit(1);

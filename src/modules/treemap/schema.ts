@@ -7,6 +7,7 @@ export const CellSchema = z.object({
   w: z.int().positive(),
   h: z.int().positive(),
   mod: ModuleSchema,
+  label: z.string().optional(),
 });
 
 export const RectangleSchema = z.object({
