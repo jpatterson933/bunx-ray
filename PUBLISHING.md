@@ -1,5 +1,7 @@
 # Publishing bunx-ray to npm
 
+Publish manually from your terminal. GitHub Actions runs build and test checks only; publishing a GitHub Release does not publish to npm.
+
 ## Publish
 
 ```bash
